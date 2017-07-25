@@ -1,0 +1,12 @@
+[package]
+name = "catori-core"
+version = "0.1.0"
+authors = ["tupshin"]
+
+[dependencies]
+
+[lib]
+name="catori_core"
+
+[[bin]]
+name="test"
