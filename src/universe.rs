@@ -8,7 +8,7 @@ use crate::nil::Nil;
 pub struct Dimension<CONTEXT, H, T>
     where H: Path<T>
 {
-    _phantom: PhantomData<CONTEXT>,
+    phantom: PhantomData<CONTEXT>,
     h: H,
     t: T,
 }
@@ -109,7 +109,7 @@ enum Bit<C, H>
 {
     False(Nil<C>),
     True(H),
-    _phantom(PhantomData<C>),
+    Phantom(PhantomData<C>),
 }
 
 trait BitSeq<C, H>: Path<H, Context = C> where C: Path<H> {}
@@ -159,7 +159,7 @@ impl<CONTEXT, H, T> Collider<CONTEXT> for Dimension<CONTEXT, H, T>
     type T = T;
     fn collide(a: H, b: T) -> Dimension<CONTEXT, H, T> {
         Dimension {
-            _phantom: PhantomData,
+            phantom: PhantomData,
             h: a,
             t: b,
         }

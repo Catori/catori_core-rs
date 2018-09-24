@@ -1,5 +1,4 @@
 use crate::{Category};
-use crate::algebra::Succ;
 use crate::nil::Nil;
 ///A `Path` is a HoTT-like path between spaces, which are `HLists`s
 ///in the abstract sense, and `Dimensions`s when instantiated at runtime
@@ -26,7 +25,6 @@ impl<C: Category + Default> Path<C> for C {
 }
 
 
-use crate::algebra::Peano;
 // impl Path<Peano> for usize {
 //     type Context = usize;
 //     type T = Succ<usize>;

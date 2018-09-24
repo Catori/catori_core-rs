@@ -2,8 +2,8 @@ use std::marker::PhantomData;
 
 extern crate catori_core;
 use catori_core::Default;
-struct Particle<C, H, T>(PhantomData<C>, H, T);
-// type Food<C> = Particle<C,(),()>;
+//struct Particle<C, H, T>(PhantomData<C>, H, T);
+//type Food<C> = Particle<C,(),()>;
 use catori_core::*;
 #[derive(Ord,PartialOrd,Eq,PartialEq,Default)]
 struct Food<C, H: Category>(PhantomData<C>, H);
