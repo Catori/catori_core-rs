@@ -56,7 +56,7 @@ impl Path<Grass> for Cow {
 ///Lions can acquire Meat
 
 trait Consumer<HERE: Path<THERE>, THERE: Default>: Path<HERE, T = THERE> {
-    fn consume(here: HERE, there: THERE) -> HERE {
+    fn consume(here: HERE, _there: THERE) -> HERE {
         here
     }
 }
@@ -69,7 +69,7 @@ impl<PATH: Path<HERE>, HERE: Default> Consumer<HERE, <PATH as Path<HERE>>::T> fo
 trait Eater<FOOD: Default>: Consumer<Self, FOOD>
     where Self: Path<FOOD>
 {
-    fn eats(self, food: FOOD) -> Self {
+    fn eats(self, _food: FOOD) -> Self {
         //Consumer::consume(self,food)
         self
     }
@@ -97,8 +97,8 @@ impl Getter<Grass> for Cow {}
 
 
 fn main() {
-    let leo = Lion::default();
-    let milka = Cow::default();
+    let _leo = Lion::default();
+    let _milka = Cow::default();
     //let meat: Meat = Meat::default();
     //leo.eats(meat);
     // milka.eats(milka.gets());

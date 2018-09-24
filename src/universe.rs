@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
 
-use {Category, Path};
-use nil::Nil;
+use crate::{Category, Path};
+use crate::nil::Nil;
 
 #[derive(Eq,PartialEq,Ord,PartialOrd,Clone,Default)]
 pub struct Dimension<CONTEXT, H, T>

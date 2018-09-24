@@ -1,4 +1,4 @@
-use {Dimension, Path, Nil, Category, Measure};
+use crate::{Dimension, Path, Nil, Category, Measure};
 use std::ops::Add;
 use std::marker::PhantomData;
 

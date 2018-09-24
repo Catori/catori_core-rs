@@ -8,8 +8,8 @@ mod universe;
 mod nil;
 mod algebra;
 
-pub use path::*;
-pub use category::*;
-pub use universe::*;
-pub use nil::*;
-pub use algebra::*;
+pub use crate::path::*;
+pub use crate::category::*;
+pub use crate::universe::*;
+pub use crate::nil::*;
+pub use crate::algebra::*;

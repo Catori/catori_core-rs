@@ -1,4 +1,4 @@
-use {Category,Path,Dimension};
+use crate::{Category,Path,Dimension};
 use std::marker::PhantomData;
 
 ///Nil is a zero sized type, but unlike (), it has knowledge of its parent type,
