@@ -8,5 +8,5 @@ authors = ["tupshin"]
 [lib]
 name="catori_core"
 
-[[bin]]
-name="test"
+# [[bin]]
+# name="test"

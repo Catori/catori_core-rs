@@ -1,4 +1,4 @@
-use crate::{Category, Universe};
+use crate::{Category};
 use crate::algebra::Succ;
 use crate::nil::Nil;
 ///A `Path` is a HoTT-like path between spaces, which are `HLists`s

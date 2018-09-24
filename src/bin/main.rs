@@ -1,4 +1,3 @@
-#![feature(conservative_impl_trait)]
 use std::marker::PhantomData;
 
 extern crate catori_core;
