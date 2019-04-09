@@ -1,46 +1,46 @@
-use crate::{Dimension, Path, Nil, Category, Measure};
-use std::ops::Add;
-use std::marker::PhantomData;
+use crate::{Dimension, Path, Nil, Catori, Measure};
+use core::ops::Add;
+use core::marker::PhantomData;
 
-trait Semigroup<Here>
-    where Here: Path<<Self as Semigroup<Here>>::There>
+trait Semigroup<HERE>
+    where HERE: Path<<Self as Semigroup<HERE>>::There>
 {
     type Context;
     type There;
-    fn combine(here: Here, there: Self::There) -> Here;
+    fn combine(here: HERE, there: Self::There) -> HERE;
 }
 
-trait Monoid<Here>: Semigroup<Here>
-    where Here: Path<<Self as Semigroup<Here>>::There>
+trait Monoid<HERE>: Semigroup<HERE>
+    where HERE: Path<<Self as Semigroup<HERE>>::There>
 {
     type Context;
     type Empty;
 }
 
 
-impl<Context, Here, There> Semigroup<Here> for Dimension<Context, Here, There>
-    where Here: Path<Here> + Path<There> + Add<Output = Here>,
-          There: Path<Here>
+impl<CONTEXT, HERE, THERE> Semigroup<HERE> for Dimension<CONTEXT, HERE, THERE>
+    where HERE: Path<HERE> + Path<THERE> + Add<Output = HERE>,
+          THERE: Path<HERE>
 {
-    type Context = Context;
-    type There = Here;
-    fn combine(x: Here, y: Here) -> Here {
+    type Context = CONTEXT;
+    type There = HERE;
+    fn combine(x: HERE, y: HERE) -> HERE {
         x + y
     }
 }
 
 
-impl<Context, Here> Monoid<Here> for Dimension<Context, Here, Here>
-    where Here: Path<Here> + Add<Output = Here>
+impl<CONTEXT, HERE> Monoid<HERE> for Dimension<CONTEXT, HERE, HERE>
+    where HERE: Path<HERE> + Add<Output = HERE>
 {
-    type Context = Context;
-    type Empty = Nil<Context>;
+    type Context = CONTEXT;
+    type Empty = Nil<CONTEXT>;
 }
 
-pub trait Peano<Measure> {}
-pub trait NonZero<M>: Peano<M> {}
-pub trait NonNeg<M>: Peano<M> {}
-pub trait NonPos<M>: Peano<M> {}
+pub trait Peano<MEASURE> {}
+pub trait NonZero<MEASURE>: Peano<MEASURE> {}
+pub trait NonNeg<MEASURE>: Peano<MEASURE> {}
+pub trait NonPos<MEASURE>: Peano<MEASURE> {}
 
 #[derive(Copy, Clone)]
 pub struct Succ<N: NonNeg<N>> {
@@ -127,7 +127,7 @@ impl<Lhs, Rhs> Add<Pred<Rhs>> for Succ<Lhs>
 ///usize is a good measure...but not the only good measure
 ///This should be generic over Natural numbers
 //impl<M> Measure<Peano<M>> for M{}
-impl<M> Measure<M> for M where M: Path<M> + NonNeg<M> + Category + Default {}
+impl<M> Measure<M> for M where M: Path<M> + NonNeg<M> + Catori + Default {}
 
 // impl Peano<usize> for usize {}
 // impl NonNeg<usize> for usize {}

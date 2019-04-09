@@ -1,15 +1,15 @@
-use crate::{Category};
+use crate::{Catori};
 use crate::nil::Nil;
-///A `Path` is a HoTT-like path between spaces, which are `HLists`s
-///in the abstract sense, and `Dimensions`s when instantiated at runtime
-///
-///
+///A `Path` represets the abstract notion that there is a path from Here to There,
+/// or in other words, given a Here, an implementor of a Path guarantees that if it is traversed
+/// from Here, then eventually a There will be reached
 ///This is inspired by HCons from HList
-pub trait Path<H>: Category + Sized + Default {
-    type Context: Category;
-    type T: Path<Self::T>;
-    fn next(self) -> Self::T {
-        Self::T::default()
+pub trait Path<HERE>: Catori + Sized + Default {
+    type Context: Catori;
+    type There: Path<Self::There>;
+    fn next(self) -> Self::There {
+
+        Self::There::default()
     }
 }
 
@@ -19,33 +19,33 @@ pub trait Path<H>: Category + Sized + Default {
 
 ///Any Category that is also instantiatable by Default, is a path to itself
 ///In other words, a default Category implies its own existence
-impl<C: Category + Default> Path<C> for C {
-    type Context = C;
-    type T = Nil<C>;
+impl<Context: Catori + Default> Path<Context> for Context {
+    type Context = Context;
+    type There = Nil<Context>;
 }
 
 
 // impl Path<Peano> for usize {
 //     type Context = usize;
-//     type T = Succ<usize>;
-//     fn next(self) -> Self::T {
+//     type There = Succ<usize>;
+//     fn next(self) -> Self::There {
 
 //     }
 // }
 
 ///Within a Context, two Categories (Here and There) are equivalent, and hence equal,
 //so long as within Context there is a path from Here to There, as well as from There to Here.
-trait Equivalent<Context, H, T>
-    : Path<H, Context = Context, T = T> + Path<T, Context = Context, T = H>
+trait Equivalent<Context, Here, There>
+    : Path<Here, Context = Context, There = There> + Path<There, Context = Context, There = Here>
 where
-    Context: Category,
-    H: Path<T>,
-    T: Path<T>,
+    Context: Catori,
+    Here: Path<There>,
+    There: Path<There>,
 {
-    fn eq(_: H, _: T) -> bool {
+    fn eq(_: Here, _: There) -> bool {
         true
     }
 }
 
 ///Not all categories have a default value, but a Measure must
-pub trait Measure<M: Category + Default>: Path<M> + Default {}
+pub trait Measure<M: Catori + Default>: Path<M> + Default {}
