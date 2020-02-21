@@ -12,7 +12,8 @@ failed observation?
 ### Here/True Type
 Any position within Catori space that is occupyable is, by definition, not nil.
 HERE can always be used synonymously with True. 
-Note that a bare HERE type is actually just 
+Note that a bare HERE type is actually just shorthand for 
+```Path<Nil,True,Nil>(true)
 
 ### Path Type
 The Path Type represents a traversal between Nils
