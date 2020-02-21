@@ -5,7 +5,7 @@ and a general approach to logical construction.
 ## Catori Types
 
 ### Nil Type
-The Nil type is implicitly the beginning and end of all Path. 
+The Nil type is implicitly the beginning and end of all Paths. 
 It represents non-existence, and cannot actually be inhabited except by a
 failed observation?
 
