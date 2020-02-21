@@ -30,7 +30,7 @@ There is
 The generic version of a Path is
 
 ```rust
-struct Path<FROM, HERE, THERE(PhantonData<From>, HERE, THERE);
+struct Path<FROM, HERE, THERE(PhantonData<FROM>, HERE, THERE);
 ```
 
 The simplest possible concrete representation of a Path is a struct that 
