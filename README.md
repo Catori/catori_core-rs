@@ -105,21 +105,42 @@ The question mark is used to indicate an observation relationship.
 
 So if we define a Universe/Path as 
 ```
-let mycalc = (2 + 2);
+let two_plus_two = (2 + 2);
 ```
 The
 ```
-mycalc ? Three => false
+two_plus_two ? Three => false
 ```
 whereas
 ```
-mycalc ? Four => true
+two_plus_two ? Four => true
 ```
 
 because
 ```
-(true+true)+(true+true)=>(true+true+true+true)=>Four
+two_plus_two=>(true+true)+(true+true)=>(true+true+true+true)=>Four
 
 ```
 
- 
+ Because observations that are only true/false are somewhat limiting, 
+ wildcards can be used in any observation. To constrain the output to a single value(dimension), we
+ use the underscore(_). 
+ ```
+two_plus_two ? (_) => Four
+```
+Wildcards can be used multiple times to represent different dimensions. In order to evaluate to
+a value, the entire structure must be observable *structurally matching* the wildcards, so:
+```
+two_plus_two ? (_+_) => (Two+Two) 
+//While four could be derived from 3+1, there is no way to get there from Two+Two that doesn't require dimensional expansion
+
+two_plus_two ? (Two+_) => (Two+Two) 
+//The underscore gets matched and the rest passes through
+
+two_plus_two ? (3+_) => false
+```
+
+Finally, wildcards can be named and referenced in the output:
+```
+one_plus_two ? (VAR1+VAR2) => (VAR1*VAR2) ? (_) => Nine
+```
