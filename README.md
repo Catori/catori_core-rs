@@ -90,8 +90,10 @@ We will use the common multiplication operator (*) to combine exists Paths into 
 In contrast to Summation, the Product type involves combining two Paths along different dimensions, and 
 creating a field of all possible permutations of the two paths. Without showing the full type expansion, the runtime
 of a summation type can be characterized as:
+```
 Three * Three => Nine
 (true, true, true) * (true, true, true) => (true, true, true, true, true, true, true, true, true)
+```
 
 ### Observation Type
 Any Catori Path can be an Observation Type. When one Path is observed by another Path, 
