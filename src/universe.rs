@@ -2,6 +2,7 @@ use core::marker::PhantomData;
 
 use crate::{Catori, Path};
 use crate::nil::Nil;
+use fixedvec::FixedVec;
 
 #[derive(Eq,PartialEq,Ord,PartialOrd,Clone,Default)]
 pub struct Dimension<CONTEXT, HERE, THERE>
@@ -59,7 +60,7 @@ impl<CONTEXT, HERE, THERE> Catori for Dimension<CONTEXT, HERE, THERE>
 }
 
 ///A space is a bag of dimensions that are all valid within the same CONTEXT
-pub struct Universe<CONTEXT, HERE, THERE>(PhantomData<CONTEXT>, Vec<(HERE, THERE)>) where HERE: Path<THERE>;
+pub struct Universe<CONTEXT, HERE:'static+Copy, THERE:'static+Copy>(PhantomData<CONTEXT>, FixedVec<'static, (HERE, THERE)>) where HERE: Path<THERE>;
 
 trait Wave<WAVE, HERE, THERE>: Path<WAVE> + Path<HERE>
     where WAVE: Path<WAVE> + Path<HERE>,
@@ -128,6 +129,10 @@ impl<CONTEXT, HERE> Path<HERE> for Bit<CONTEXT, HERE>
 {
     type Context = CONTEXT;
     type There = Nil<HERE>;
+    fn next(self) -> Self::There {
+
+        Self::There::default()
+    }
 }
 
 //pub trait Bit{}

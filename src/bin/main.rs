@@ -31,6 +31,11 @@ impl<CONTEXT, HERE: Catori> Path<Food<CONTEXT, HERE>> for Grass
 {
     type Context = CONTEXT;
     type There = Nil<CONTEXT>;
+
+    fn next(self) -> Self::There {
+
+        Self::There::default()
+    }
 }
 
 
@@ -42,17 +47,28 @@ impl<CONTEXT, HERE: Catori> Path<Food<CONTEXT, HERE>> for Grass
 impl Path<Animal<Grass>> for Cow {
     type Context = Animal<Grass>;
     type There = Nil<Self::Context>;
+    fn next(self) -> Self::There {
+
+        Self::There::default()
+    }
 }
 ///The existence of a Cow implies the existence of Grass
 impl Path<Cow> for Grass {
     type Context = Animal<Grass>;
     type There = Nil<Self::Context>;
-}
+    fn next(self) -> Self::There {
+
+        Self::There::default()
+    }}
 ///The existence of Grass implies a Path to Cow
 impl Path<Grass> for Cow {
     type Context = Animal<Grass>;
     type There = Nil<Self::Context>;
-}
+
+    fn next(self) -> Self::There {
+
+        Self::There::default()
+    }}
 ///Lions can acquire Meat
 
 trait Consumer<HERE: Path<THERE>, THERE: Free>: Path<HERE, There = THERE> {

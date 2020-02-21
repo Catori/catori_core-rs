@@ -8,13 +8,13 @@ pub struct Nil<CONTEXT>(PhantomData<CONTEXT>);
 
 impl<CONTEXT> Catori for Nil<CONTEXT> where CONTEXT:Path<Nil<CONTEXT>> {
  //   type Context = C;
-    fn length(&self) -> usize {
+    default fn length(&self) -> usize {
         0
     }
 }
 
 impl<CONTEXT> Path<Nil<CONTEXT>> for Nil<CONTEXT> where CONTEXT:Path<Nil<CONTEXT>>{
-    fn next(self) -> Self::There {
+    default fn next(self) -> Self::There {
         Self::There::default()
     }
 }

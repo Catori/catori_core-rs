@@ -3,13 +3,13 @@
 ///one can reason about is nested ordering and equality
 ///No other attributes of a data type are relevant to Catori.
 pub trait Catori: Ord {
-    fn length(&self) -> usize {
-        1
-    }
+    fn length(&self) -> usize;
 }
 
 ///Any non Catori type that is Ord can be automatically promoted to a Catori type
-impl<CAT> Catori for CAT where CAT:Ord{}
+impl<CAT> Catori for CAT where CAT:Ord{
+    default fn length(&self) -> usize {1}
+}
 
 
 pub trait Free : Catori + core::default::Default {}

@@ -7,10 +7,7 @@ use crate::nil::Nil;
 pub trait Path<HERE>: Catori + Sized + Default {
     type Context: Catori;
     type There: Path<Self::There>;
-    fn next(self) -> Self::There {
-
-        Self::There::default()
-    }
+    fn next(self) -> Self::There;
 }
 
 
@@ -22,7 +19,12 @@ pub trait Path<HERE>: Catori + Sized + Default {
 impl<Context: Catori + Default> Path<Context> for Context {
     type Context = Context;
     type There = Nil<Context>;
+    default fn next(self) -> Self::There {
+
+        Self::There::default()
+    }
 }
+
 
 
 // impl Path<Peano> for usize {
