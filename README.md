@@ -38,29 +38,29 @@ There is
 
 The generic version of a Path is
 
-```rust
+```
 struct Path<FROM, HERE, THERE(PhantonData<FROM>, HERE, THERE);
 ```
 
 The simplest possible concrete representation of a Path is a struct that 
 goes from Nil to Nil and is entangled with nothing.
 
-```rust
+```
 struct Path<Nil, True, Nil>(true:);
 ```
 
 for representational convenience, Paths can be named
-```rust
+```
 let One = Path<Nil, True, Nil>(true);
 ```
 (Note that the equals sign is only used for naming things)
 
 and built on
-```rust
+```
 let Two = Path<Nile, One, Nil(One);
 ```
 which, of course, expands to:
-```rust
+```
 Path<Nil, Path<Nil, True, Nil>(true), Nil>(Path<Nil, True, Nil>(true))
 ```
 Which, once all the types collapse, amounts to (true, true), or more precisely (true(true))
@@ -89,11 +89,11 @@ relationship between two existing types:
 
 Summation can be viewed as linearly laying out two paths along the same dimension.
 
-```rust
+```
 Path<Nil, True, Nil>(true) + Path<Nil, True, Nil>(true) => Path<Nil, Path<Nil, True, Nil>(true), Nil>(Path<Nil, True, Nil>(true))
 ```
 or in other words
-```rust
+```
 One + One => Two
 ```
 ### Product/Field/Entanglement Type
@@ -108,7 +108,7 @@ Three * Three => Nine
 
 ### Observation Type
 Any Catori Path can be an Observation Type. When one Path is observed by another Path, 
-the Observee collapses (evalutes) itself, in an attempt to conform to the expectations of the observer.
+the Observee collapses (evaluates) itself, in an attempt to conform to the expectations of the observer.
 All operations except observations are lazy, or in other words, there is only structure until
 observation puts things into motion.
 
@@ -158,12 +158,14 @@ Finally, wildcards can be named and referenced in the output:
 one_plus_two ? (VAR1+VAR2) => (VAR1*VAR2) ? (_) => Nine
 ```
 
+
 ###Subtraction
 Since subtraction is the reciprocal of addition, we can use a destructuring observation to perform subtraction
 
 ```
 Three ? (_) + (Two) => One
 ```
+
 
 ###Division
 Similarly, since division is the reciprocal of multiplication, integer division can be performed as a 
