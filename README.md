@@ -158,7 +158,6 @@ Finally, wildcards can be named and referenced in the output:
 one_plus_two ? (VAR1+VAR2) => (VAR1*VAR2) ? (_) => Nine
 ```
 
-
 ###Subtraction
 Since subtraction is the reciprocal of addition, we can use a destructuring observation to perform subtraction
 
