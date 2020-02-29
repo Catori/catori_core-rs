@@ -75,6 +75,7 @@ See [Church Numerals/Encoding](https://en.wikipedia.org/wiki/Church_encoding) an
 
 
 ##Algebraic Types
+
 See [Algebraic Data Types](https://en.wikipedia.org/wiki/Algebraic_data_type)
 
 (Note that I'm using => instead of = or ==. This is to strongly imply the notion that 
@@ -160,6 +161,7 @@ one_plus_two ? (VAR1+VAR2) => (VAR1*VAR2) ? (_) => Nine
 
 
 ###Subtraction
+
 Since subtraction is the reciprocal of addition, we can use a destructuring observation to perform subtraction
 
 ```
@@ -168,6 +170,7 @@ Three ? (_) + (Two) => One
 
 
 ###Division
+
 Similarly, since division is the reciprocal of multiplication, integer division can be performed as a 
 destructuring observation, as well
 
@@ -183,3 +186,4 @@ Five ? (_) * (Two) => False //Five is not evenly divisible by two, and all paths
 But
 ```
 Five ? (_) * (Two +  _) => (2,1)
+
