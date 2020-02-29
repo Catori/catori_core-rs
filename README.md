@@ -2,6 +2,12 @@
 Catori attempts to be a world view, a programming language, 
 and a general approach to logical construction.
 
+Catori is structurally typed, and any object is uniquely identified by its relationship to other objects
+
+Catori structures are paths between other structures and exist in an 
+[ordered substructural type system](https://en.wikipedia.org/wiki/Substructural_type_system#Ordered_type_system)
+and therefore obey the laws of [noncommutative logic](https://en.wikipedia.org/wiki/Noncommutative_logic)
+
 ## Catori Types
 
 ### Nil Type
@@ -52,13 +58,17 @@ let One = Path<Nil, True, Nil>(true);
 and built on
 ```rust
 let Two = Path<Nile, One, Nil(One);
-let Three = Path<Nile, Three, Nil(Three);
 ```
 which, of course, expands to:
 ```rust
 Path<Nil, Path<Nil, True, Nil>(true), Nil>(Path<Nil, True, Nil>(true))
 ```
 Which, once all the types collapse, amounts to (true, true), or more precisely (true(true))
+
+and the progression continues
+```
+let Three = Path<Nil, Two, Nil(Two);
+```
 
 See [Church Numerals/Encoding](https://en.wikipedia.org/wiki/Church_encoding) and Peano Encoding
 
@@ -73,7 +83,8 @@ left hand side (LHS) produces(=>) the right hand side(RHS).
 LHS=>RHS
 
 ### Sum/Concatenation Type
-The Sum type is the addition or concatenation of two paths. We will use the standard addition "operator" to define a Sum Type 
+The Sum type is the addition or concatenation of two paths. We will use the standard addition 
+"operator"(+) to define a Sum Type 
 relationship between two existing types:
 
 Summation can be viewed as linearly laying out two paths along the same dimension.
@@ -144,3 +155,28 @@ Finally, wildcards can be named and referenced in the output:
 ```
 one_plus_two ? (VAR1+VAR2) => (VAR1*VAR2) ? (_) => Nine
 ```
+
+
+###Subtraction
+Since subtraction is the reciprocal of addition, we can use a destructuring observation to perform subtraction
+
+```
+Three ? (_) + (Two) => One
+```
+
+###Division
+Similarly, since division is the reciprocal of multiplication, integer division can be performed as a 
+destructuring observation, as well
+
+```
+Six ? (_) * (Two) => Three
+```
+
+However, 
+```
+Five ? (_) * (Two) => False //Five is not evenly divisible by two, and all paths/remnants must be consumed
+```
+
+But
+```
+Five ? (_) * (Two +  _) => (2,1)
