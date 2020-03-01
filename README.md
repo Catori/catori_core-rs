@@ -168,6 +168,9 @@ Since subtraction is the reciprocal of addition, we can use a destructuring obse
 Three ? (_) + (Two) => One
 ```
 
+```
+alias '-A' ?(_) + (A)
+```
 
 ###Division
 
@@ -176,6 +179,10 @@ destructuring observation, as well
 
 ```
 Six ? (_) * (Two) => Three
+```
+
+```
+alias '/A' ?(_) * (A)
 ```
 
 However, 
@@ -204,7 +211,11 @@ When performing an observation, the way to think and speak about it is:
 
 In the context of A, B and C are (or are not) observationally equivalent
 
-
+```
 (Five,(Four+One)) ? (A,A) => true
+```
 
 both Five, and Four+One evaluate to the same value in one dimension
+```
+alias '==' (?(A,A))
+```
