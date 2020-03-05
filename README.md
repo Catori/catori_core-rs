@@ -368,7 +368,9 @@ A list  is  a  sequence  of  either  atoms  or  other  lists  separated  by  bla
 
 But types can be inferred in most cases
 
-### Simplifying Syntax
+## Simplifying Syntax
+
+### Destructuring
 Destructuring (?) is a binary operator that tries to fit the LHS into the pattern expressed by the RHS.
 If will always return either false or the exact number of dimensions asked for on the RHS
 (The => is not part of the syntax and just refers to the value being returned)
@@ -397,8 +399,42 @@ As a unary postfix operator, a ? always tries to destructure into a single dimen
 3*3 ?= 9
 ```
 
-Observation is eagerly evaluated destructuring or pattern matching. We will use ?= as the eager observation operator.
+### Observation
+Observation is eagerly evaluated destructuring or pattern matching. We will use ?= as the this eager observation operator.
 Nothing other than using ?= will actually result in any evaluation. Otherwise, Observing using ?= is semnatically and
 syntactically identical to destructuring using ?
+
+
+Any operator that is an alias for a destructuring operation can be made eager insted of lazy by adding '='.
+
+#### Lazy division:
+
+```
+6/3 => 2 (but only lazily)
+6/=3 => 2 (eagerly)
+```
+
+#### Lazy multiplication
+
+```
+6 * 3 => 18 (lazily)
+6 *= 3 => 18 (eagerly)
+```
+
+#### Lazy addition
+
+```
+6 + 3 => 9 (lazily)
+6 += 3 => 9 (eagerly)
+```
+
+#### Lazy subtraction
+
+```
+6 - 2 => 4 (lazily)
+6 -= 2 => 4 (eagerly)
+```
+
+In general use of eager variations should be minimized and only used to force output/processing
 
 
