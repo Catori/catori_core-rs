@@ -83,6 +83,8 @@ left hand side (LHS) produces(=>) the right hand side(RHS).
 
 LHS=>RHS
 
+The type system is established the rules that can be performed by these types.
+
 ### Sum/Concatenation Type
 The Sum type is the addition or concatenation of two paths. We will use the standard addition 
 "operator"(+) to define a Sum Type 
@@ -108,6 +110,9 @@ Three * Three => Nine
 ```
 
 ### Observation Type
+
+Observation is based on destructuring
+
 Any Catori Path can be an Observation Type. When one Path is observed by another Path, 
 the Observee collapses (evaluates) itself, in an attempt to conform to the expectations of the observer.
 All operations except observations are lazy, or in other words, there is only structure until
@@ -118,6 +123,8 @@ When an Observation Type is fully specified, The result is either true/Here or f
 The question mark is used to indicate an observation relationship.
 
 So if we define a Universe/Path as 
+
+(true,true)(true,true)
 ```
 let two_plus_two = (2 + 2);
 ```
@@ -192,7 +199,7 @@ Five ? (_) * (Two) => False //Five is not evenly divisible by two, and all paths
 
 But
 ```
-Five ? (_) * (Two +  _) => (2,1)
+Five ? ((_) * (Two )+  _) => (2,1)
 ```
 ###
 Deriving additional operations
