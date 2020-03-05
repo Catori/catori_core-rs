@@ -438,3 +438,13 @@ Any operator that is an alias for a destructuring operation can be made eager in
 In general use of eager variations should be minimized and only used to force output/processing
 
 
+### Observing into complex structure
+
+Observation and destructuring can also have nested structure
+```
+((3+3),(4+5)) ?= (_,(_,_)) => (6,4,5)
+```
+
+```
+((3+3),(4+5)) ?= (Byte(_),(_,_)) => (00000110,(4,5))
+```
