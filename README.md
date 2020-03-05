@@ -149,8 +149,10 @@ two_plus_two=>(true+true)+(true+true)=>(true+true+true+true)=>Four
  ```
 two_plus_two ? (_) => Four
 ```
+
 Wildcards can be used multiple times to represent different dimensions. In order to evaluate to
 a value, the entire structure must be observable *structurally matching* the wildcards, so:
+
 ```
 two_plus_two ? (_+_) => (Two+Two) 
 //While four could be derived from 3+1, there is no way to get there from Two+Two that doesn't require dimensional expansion
@@ -201,6 +203,8 @@ But
 ```
 Five ? ((_) * (Two )+  _) => (2,1)
 ```
+
+
 ###
 Deriving additional operations
 So far we have only used 
