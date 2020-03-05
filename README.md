@@ -109,11 +109,9 @@ Three * Three => Nine
 (true, true, true) * (true, true, true) => (true, true, true, true, true, true, true, true, true)
 ```
 
-### Observation Type
+### Destructuring Type
 
-Observation is based on destructuring
-
-Any Catori Path can be an Observation Type. When one Path is observed by another Path, 
+Any Catori Path can be an observed or destructured. When one Path is observed by another Path, 
 the Observee collapses (evaluates) itself, in an attempt to conform to the expectations of the observer.
 All operations except observations are lazy, or in other words, there is only structure until
 observation puts things into motion.
@@ -169,7 +167,7 @@ one_plus_two ? (VAR1+VAR2) => (VAR1*VAR2) ? (_) => Nine
 ```
 
 
-###Subtraction
+### Subtraction
 
 Since subtraction is the reciprocal of addition, we can use a destructuring observation to perform subtraction
 
@@ -181,7 +179,7 @@ Three ? (_) + (Two) => One
 alias '-A' ?(_) + (A)
 ```
 
-###Division
+### Division
 
 Similarly, since division is the reciprocal of multiplication, integer division can be performed as a 
 destructuring observation, as well
@@ -205,12 +203,10 @@ Five ? ((_) * (Two )+  _) => (2,1)
 ```
 
 
-###
-Deriving additional operations
-So far we have only used 
+### Deriving additional operations
+TODO
 
-
-##Deriving Equality
+## Deriving Equality
 
 There is no traditional notion of equality, in a Catori universe. Instead, partly inspired by Vladimir Vovodsky's 
 Univalence Axiom, there is only a notion of Observational Equality. Observational Equality can be defined as:
@@ -314,15 +310,15 @@ However
 because 321 can't be fit into an 8 dimensional 1 bit space without overflowing
 
 
-##The Language
-###Symbolic Expressions
+## The Language
+### Symbolic Expressions
 Catori uses Lisp-like S-expressions to construct its N-dimensional paths. However, instead of eval,
 Catori has the observation(?) operator, and all execution is performed by observing one structure as another structure
 
 An atomic symbol is a string of numerals, letters, and underscores. 
 The first character must be a letter or underscore.
 
-####Examples
+#### Examples
 A
 Apple
 PART_2
@@ -360,6 +356,8 @@ A list  is  a  sequence  of  either  atoms  or  other  lists  separated  by  bla
  (a (b c) (d (e f)))
  ()
  
+ 
+ 
  Unlike LISP, suffixes are often used to represent the type of a numeric atom when constants are being used
  
  ```
@@ -369,3 +367,38 @@ A list  is  a  sequence  of  either  atoms  or  other  lists  separated  by  bla
 ```
 
 But types can be inferred in most cases
+
+### Simplifying Syntax
+Destructuring (?) is a binary operator that tries to fit the LHS into the pattern expressed by the RHS.
+If will always return either false or the exact number of dimensions asked for on the RHS
+(The => is not part of the syntax and just refers to the value being returned)
+ ```
+(2 + 2 ) ? (_) => 4
+(2 + 2) ? (_,_) => (2 , 2)
+```
+
+If a LHS can be destructured multiple ways into the pattern expressed by the RHS, then 
+an observatin will result in new path containing all the possible ways that the LHS can be validly destructured
+```
+(12) ? (_ ,_) => (1,11) | (2,10) | (3,9) | etc
+```
+Destructuring is always lazy
+
+
+
+
+As a unary postfix operator, a ? always tries to destructure into a single dimensional value
+```
+2+2 ? => 4
+```
+
+```
+(true,true,true)*(true,true,true) ?= 9
+3*3 ?= 9
+```
+
+Observation is eagerly evaluated destructuring or pattern matching. We will use ?= as the eager observation operator.
+Nothing other than using ?= will actually result in any evaluation. Otherwise, Observing using ?= is semnatically and
+syntactically identical to destructuring using ?
+
+
