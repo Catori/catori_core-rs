@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use log::{error,warn,info};
 
 extern crate catori_core;
 use catori_core::Free;
@@ -111,20 +112,60 @@ impl Getter<Grass> for Cow {}
 
 
 
+//
+// fn main() {
+//     let _leo = Lion::default();
+//     let _milka = Cow::default();
+//     //let meat: Meat = Meat::default();
+//     //leo.eats(meat);
+//     // milka.eats(milka.gets());
+//     //milka.eats(leo.gets());
+//     //let lambda: Animal<F> = Animal::default();
+//
+//     //     let ua = UA{};
+//     // type a = ua::h;
+//     //     struct B();
+//     //   let A = Universe
+//     //   type AA = Path
+//     //   type B = Universe<Nil,A,B>;
+// }
+
+//use serde_lexpr::{from_str, to_string};
+use lexpr::{sexp,Value,Cons};
+
+
+// #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+// struct Observation(, String, u8);
+
+struct Observation {
+    lens: Cons,
+    path: Cons,
+}
 
 fn main() {
-    let _leo = Lion::default();
-    let _milka = Cow::default();
-    //let meat: Meat = Meat::default();
-    //leo.eats(meat);
-    // milka.eats(milka.gets());
-    //milka.eats(leo.gets());
-    //let lambda: Animal<F> = Animal::default();
+    // let v1: Vec<u32> = from_str("(1 2 3)").unwrap();
+    // assert_eq!(v1, vec![1, 2, 3]);
+    // assert_eq!(to_string(&v1).unwrap(), "(1 2 3)".to_string());
+    // let v2: Vec<u32> = from_str("#(1 2 3)").unwrap();
+    // assert_eq!(v1, v2);
+    // assert_eq!(to_string(&v2).unwrap(), "(1 2 3)".to_string());
+    // dbg!(v1);
+    // dbg!(v2);
+    //
+    //
+    // let address = sexp!(((name . "Jane Doe") (street . "4026 Poe Lane")));
+    // dbg!(address);
+    //
+    //
+    // let names = Value::list(vec!["Alice", "Bob", "Mallory"]);
+    // println!("The bad guy is {}", names[2].as_str().unwrap());
+    let string = "(? _ 3)";
+    let catexp = lexpr::from_str(&string).expect("parsing failed");
 
-    //     let ua = UA{};
-    // type a = ua::h;
-    //     struct B();
-    //   let A = Universe
-    //   type AA = Path
-    //   type B = Universe<Nil,A,B>;
+    match catexp[0].as_symbol().unwrap() {
+        "?" => Observation{lens: *catexp[1].as_cons().unwrap(), path: *catexp[2].as_cons().unwrap()},
+        other=> {todo!("{:?} not supported. Can only observe with ?", other);panic!()}
+    }
+   // let catexp:Cons = from_str("(?)").unwrap();
+    dbg!(catexp);
 }

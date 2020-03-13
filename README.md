@@ -418,21 +418,18 @@ Any operator that is an alias for a destructuring operation can be made eager in
 
 ```
 6 * 3 => 18 (lazily)
-6 *= 3 => 18 (eagerly)
 ```
 
 #### Lazy addition
 
 ```
 6 + 3 => 9 (lazily)
-6 += 3 => 9 (eagerly)
 ```
 
 #### Lazy subtraction
 
 ```
 6 - 2 => 4 (lazily)
-6 -= 2 => 4 (eagerly)
 ```
 
 In general use of eager variations should be minimized and only used to force output/processing
