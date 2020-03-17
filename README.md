@@ -8,205 +8,151 @@ Catori structures are paths between other structures and exist in an
 [ordered substructural type system](https://en.wikipedia.org/wiki/Substructural_type_system#Ordered_type_system)
 and therefore obey the laws of [noncommutative logic](https://en.wikipedia.org/wiki/Noncommutative_logic)
 
-## Catori Types - A Theoretical Foundation
+This means that interacting with any structures destroys it (from linear logic)
+and that it is only possible to process the items in a path linearly
+and without random access.
 
-### Nil Type
-The Nil type is implicitly the beginning and end of all Paths. 
-It represents non-existence, and cannot actually be inhabited except by a
-failed observation?
+Catori uses lisp-like s-expressions but has a fundamentally different 
+evaluation model
 
-### Here/True Type
-Any position within Catori space that is occupyable is, by definition, not nil.
-HERE can always be used synonymously with True. 
-Note that a bare HERE type is actually just shorthand for 
+## Catori Structures
+The simplest catori structure is a single Point. This can be represented as 
 ```
-Path<Nil,True,Nil>(true)
+(true)
 ```
 
-### Path Type
-The Path Type represents a traversal between Nils
-It is representable in loose rust syntax as:
+All Catori structures consist of nothing but truth values. Falseness/Nil
+only exists at the beginning and end of a Path and is not reachable/occupyable
+
+### Paths
+All Catori structures consist of paths. A Point is a path, as are multiple points
+```
+(true true)
+```
+Paths are ordered representations of structural truth and can contain nested paths
+```
+(true (true true) true)
+```
+The above is a 3 element path where the second element is another path two elements long
+
+### Orientation
+Catori encourages thinking spatially. Paths can be considered to either
+be parallel to one another, or perpendicular. By embedding one path into 
+another with parentheses, as above, we are saying that the second item
+projects perpendicularly to the main path until or unless the path is flattened
+
+## Operations
+
+### Sum Type
+Any two paths can be viewed as parallel with each other and concatenated together.
+Concatenation is performed with a '+' operator.
+
+Because a path of length 2 is simply two paths of length 1 concatenated together,
+the full s-expression form of a path (with or without nested elements),
+will always start with a '+'
+```
+(+ true (+ true true) true) #Fully formed version of the example above
+```
+Concatenation is exactly the same as addition in a Catori universe
+
+The + operator can also be seen as constructing an enumeration, sum type,
+disjoint union, etc. This is because it sets up a Path structure where only one of its
+elements can be selected/occupied at any given time.
+
+### Product Type
+Paths can also be constructed using a product/multiplication operator '*'.
+When paths are multiplied together, they can be considered to be perpedincular to each
+other and creating a field of all of their possible combination.
+```
+#A 1x1 field only contains one possible value
+(* true true) => (+ true) 
+
+#A 2x1 field contains two possible values)
+(* (+ true true) (+ true)) => (+ true true)
+ 
+#A 3x2 field contains six possible values)
+(* (+ true true true) (+ true true) => (+ true true true true true true) 
+
 
 ```
-trait Path<FROM, HERE, THERE>{}
-```
-FROM is any Catori type, but it is not traversable to.
-HERE is a non-Nil Catori type that is currently occupied. It is always true.
-However HERE can be a path itself, and as such, represents all the entanglements
-that this particular HERE has.
-There is 
+### Flattening
+As we saw in the above examples, a nested/multidimensional structure can be viewed
+as a flattened representation of its values.
 
-The generic version of a Path is
-
+Any Catori structure with nested paths can be flattened to non-nested form
+e.g.
 ```
-struct Path<FROM, HERE, THERE(PhantonData<FROM>, HERE, THERE);
+(+ true (+ true true) true) 
 ```
-
-The simplest possible concrete representation of a Path is a struct that 
-goes from Nil to Nil and is entangled with nothing.
-
-```
-struct Path<Nil, True, Nil>(true:);
-```
-
-for representational convenience, Paths can be named
-```
-let One = Path<Nil, True, Nil>(true);
-```
-(Note that the equals sign is only used for naming things)
-
-and built on
-```
-let Two = Path<Nile, One, Nil(One);
-```
-which, of course, expands to:
-```
-Path<Nil, Path<Nil, True, Nil>(true), Nil>(Path<Nil, True, Nil>(true))
-```
-Which, once all the types collapse, amounts to (true, true), or more precisely (true(true))
-
-and the progression continues
-```
-let Three = Path<Nil, Two, Nil(Two);
-```
-
-See [Church Numerals/Encoding](https://en.wikipedia.org/wiki/Church_encoding) and Peano Encoding
-
-
-
-##Algebraic Types
-
-See [Algebraic Data Types](https://en.wikipedia.org/wiki/Algebraic_data_type)
-
-(Note that I'm using => instead of = or ==. This is to strongly imply the notion that 
-left hand side (LHS) produces(=>) the right hand side(RHS).
-
-LHS=>RHS
-
-The type system is established the rules that can be performed by these types.
-
-### Sum/Concatenation Type
-The Sum type is the addition or concatenation of two paths. We will use the standard addition 
-"operator"(+) to define a Sum Type 
-relationship between two existing types:
-
-Summation can be viewed as linearly laying out two paths along the same dimension.
-
-```
-Path<Nil, True, Nil>(true) + Path<Nil, True, Nil>(true) => Path<Nil, Path<Nil, True, Nil>(true), Nil>(Path<Nil, True, Nil>(true))
-```
-or in other words
-```
-One + One => Two
-```
-### Product/Field/Entanglement Type
-We will use the common multiplication operator (*) to combine exists Paths into their Product Path type.
-In contrast to Summation, the Product type involves combining two Paths along different dimensions, and 
-creating a field of all possible permutations of the two paths. Without showing the full type expansion, the runtime
-of a summation type can be characterized as:
-```
-Three * Three => Nine
-(true, true, true) * (true, true, true) => (true, true, true, true, true, true, true, true, true)
-```
-
-### Destructuring Type
-
-Any Catori Path can be an observed or destructured. When one Path is observed by another Path, 
-the Observee collapses (evaluates) itself, in an attempt to conform to the expectations of the observer.
-All operations except observations are lazy, or in other words, there is only structure until
-observation puts things into motion.
-
-When an Observation Type is fully specified, The result is either true/Here or false/Nil.
-
-The question mark is used to indicate an observation relationship.
-
-So if we define a Universe/Path as 
-
-(true,true)(true,true)
-```
-let two_plus_two = (2 + 2);
-```
-The
-```
-two_plus_two ? Three => false
-```
-whereas
-```
-two_plus_two ? Four => true
-```
-
-because
-```
-two_plus_two=>(true+true)+(true+true)=>(true+true+true+true)=>Four
-
-```
-
- Because observations that are only true/false are somewhat limiting, 
- wildcards can be used in any observation. To constrain the output to a single value(dimension), we
- use the underscore(_). 
+is the same as
  ```
-two_plus_two ? (_) => Four
+(+ true true true true)
 ```
 
-Wildcards can be used multiple times to represent different dimensions. In order to evaluate to
-a value, the entire structure must be observable *structurally matching* the wildcards, so:
+If we view Catori structures as dimensions (see Orientation above), then flattening is simply
+viewing the structure from a particular perspective, and projecting the
+source structure into that new perspective.
 
+Flattening is merely the recursive iteration through all paths and subpaths,
+outputting the truth values and discarding all structure. It can be seen as 
+maintaining the same object, but discarding all history of how it *became*
+this object. 
+
+Flattening a nested structure into a single dimension can be represented using a '~' operator
 ```
-two_plus_two ? (_+_) => (Two+Two) 
-//While four could be derived from 3+1, there is no way to get there from Two+Two that doesn't require dimensional expansion
-
-two_plus_two ? (Two+_) => (Two+Two) 
-//The underscore gets matched and the rest passes through
-
-two_plus_two ? (3+_) => false
-```
-
-Finally, wildcards can be named and referenced in the output:
-```
-one_plus_two ? (VAR1+VAR2) => (VAR1*VAR2) ? (_) => Nine
+(~ (true (true true) true) => (+ true true true true)
 ```
 
+### Syntactic Plus Elision
+From here on out, any sexpr that doesn't start with an operator or aliased operator
+will be considered to start with a plus
 
-### Subtraction
-
-Since subtraction is the reciprocal of addition, we can use a destructuring observation to perform subtraction
-
-```
-Three ? (_) + (Two) => One
-```
-
-```
-alias '-A' ?(_) + (A)
-```
-
-### Division
-
-Similarly, since division is the reciprocal of multiplication, integer division can be performed as a 
-destructuring observation, as well
+### Splitting
+A path can be split into pieces. Splitting a path adds structure to the source path
+Because a path can be split at many different locations, an unconstrained split
+operation can and will result in an iterator (new Path) through all the possible results of splitting the original
+Splitting is performed with the '?' operator. The first path after 
+the split operator is the pattern to split something into. The second path
+after the split operator is the path being split.
 
 ```
-Six ? (_) * (Two) => Three
+(? ( _ ) (true true) 
+=> (true true)
 ```
+The underscore is an unnamed placeholder indicating that the source path is
+to be split into one piece.
 
 ```
-alias '/A' ?(_) * (A)
+(? ( _ ) (true true))
+=> (true true)
 ```
 
-However, 
+Multiple underscores can be used to split the source path
+into multiple parts
 ```
-Five ? (_) * (Two) => False //Five is not evenly divisible by two, and all paths/remnants must be consumed
+(? (_ _) (true true true))
+=> (
+    (true (true true)) //first solution
+    (true true (true)) //second solution
+   )
+```
+*Note* that a path cannot be empty, so it is only valid to split a path of length
+3 into (1,2) and (2,1), not (0,3) and (3,0).
+
+Patterns used for splitting can also be named. Any token with a leading
+underscore can be used in place to alias the output.
+TODO work out better method of inline aliasing
+```
+(? ( _first _second) (true true true))
+=> (
+   _first => (true (true true)) 
+   _second => (true true (true))
+   )
 ```
 
-But
-```
-Five ? ((_) * (Two )+  _) => (2,1)
-```
 
 
-### Deriving additional operations
-TODO
-
-## Deriving Equality
+### Equality
 
 There is no traditional notion of equality, in a Catori universe. Instead, partly inspired by Vladimir Vovodsky's 
 Univalence Axiom, there is only a notion of Observational Equality. Observational Equality can be defined as:
@@ -219,29 +165,160 @@ When performing an observation, the way to think and speak about it is:
 In the context of A, B and C are (or are not) observationally equivalent
 
 ```
-(Five,(Four+One)) ? (A,A) => true
+((true true true true true)),((true true true true) (true))) ? (A,A) => true
 ```
 
-both Five, and Four+One evaluate to the same value in one dimension
+both path of length five , and paths of lengths four plus one evaluate to the same value in one dimension
 ```
-alias '==' (?(A,A))
+(alias = (? _A _A)) //Forces both the first and second values to be evaluatable to the same thing
 ```
 
-### Constructing Base 10 Integers
-Let's supposed that we can also use digits as structural aliases, and we can numerals from 1 to 9 as
-the following:
+### Inequality
+Inequality operators can be defined in terms of splits
 
 ```
-let 1 = Path<Nil, True, Nil>(true);
-let 2 = Path<Nil, 1, Nil(1);
-let 3 = Path<Nil, 2, Nil(2);
-let 4 = Path<Nil, 3, Nil(3);
-let 5 = Path<Nil, 4, Nil(4);
-let 6 = Path<Nil, 5, Nil(5);
-let 7 = Path<Nil, 6, Nil(6);
-let 8 = Path<Nil, 7, Nil(7);
-let 9 = Path<Nil, 8, Nil(8);
+(alias > (a b)) (
+     //plus function as a match operator in that each branch is evaluated
+     //   + implicit plus functions as match operator 
+     //an observation that the a path has a longer length than the
+     // b path, and therefore can be split into b + remainder
+        (? (b,_) a) (true)
+        () 
+    )
+)
+
+//inverted
+(alias < (a b)) (
+        (? (a,_) b) (true)
+        () 
+    )
+)
 ```
+
+### Exponentiation
+Concatentation allows for the evaluation of multiple disjoint branches/structures.
+
+```
+//stolen verbatim from recursive lisp implementation with defun replaced with
+alias and cond replaced with (implicit) +
+We also replace the standard observation operator with > since 
+we want to only return the higher of the  two branches even if we evaluate both of them
+(alias ^ (a b)
+  (>
+    (
+        (= b ()) true)
+    //catori supports recursively building nested structures
+        (_ (* a (^ a (- b true))))))
+```
+Unlike most languages, all matching branches will be evaluated and 
+executed as a lazy iterator
+
+
+
+## Other forms of truth
+So far, paths have consisted only of sequences of truth values. Given that no position
+in a structure can contain anything other than a single value, we have been operating
+in a base one representation.
+By usind a traditional Church/Peano encoding of the base 10 digits, we can replace
+length paths of truth with the numeric equivalents
+
+See [Church Numerals/Encoding](https://en.wikipedia.org/wiki/Church_encoding) and Peano Encoding
+
+```
+let Zero   = ()
+let One    = (Zero true)
+let Two    = (One true)
+let Three  = (Two true)
+let Four   = (Three true)
+let Five   = (Four true)
+let Six    = (Five true)
+let Seven  = (Six true)
+let Eight  = (Seven true)
+let Nine   = (Eight true)
+```
+
+
+
+It's also possible to construct an equivalent representation of the base 10 numerals
+by defining the first 10 digits and then associating position in a numeric
+token with its dimensionality
+
+We can view the base 10 digits as an N dimensional field where each dimension
+is a path of length 10^pos where pos is the offset from the left of the integer in question 
+
+So 
+```
+
+(alias 1 true)
+(alias 2 (1 true)
+(alias 3 (1 true)
+(alias 4 (2 true)
+(alias 5 (4 true)
+(alias 6 (5 true)
+(alias 7 (6 true)
+(alias 8 (7 true)
+(alias 9 (8 true)
+
+23 => (
+        ( * 2 (^ 10 1)) 
+        ( * 3 (^ 10 0))
+       )
+475 => ( 
+        ( * 4 (^ 10 2 )) 
+        ( * 7 (^ 10 1 )) 
+        ( *5 (^ 10 0 ))
+    )
+```
+
+
+
+
+```
+(? (_+_) two_plus_two ) => (Two+Two) 
+//While four could be derived from 3+1, there is no way to get there from Two+Two that doesn't require dimensional expansion
+
+(? (Two+_) two_plus_two ) => (Two+Two) 
+//The underscore gets matched and the rest passes through
+
+(? two_plus_two (3 _)) => false
+```
+
+### Subtraction
+
+Since subtraction is the reciprocal of addition, we can use a destructuring observation to perform subtraction
+
+```
+(? (Two (_))) Three) => One
+```
+
+```
+(alias (- A) (? (+ (_)  (A)))
+)
+```
+
+### Division
+
+Similarly, since division is the reciprocal of multiplication, integer division can be performed as a 
+destructuring observation, as well
+
+```
+(? Six  (* (_) (Two))) => Three
+```
+
+```
+(alias (? /A (* (_) (A)))
+```
+
+However, 
+```
+(*(? Five _ (Two) => False //Five is not evenly divisible by two, and all paths/remnants must be consumed
+```
+
+But
+```
+(? Five (* (_)  (Two ) ))+  _) => (2,1)
+```
+
 
 Further allow the syntactic construction such that two digits adjacent to each other create a
 two dimensional field plus a one dimensional path
@@ -261,17 +338,19 @@ TODO figure out how to derive this more formally in ways that don't rely on apri
 
 For convenience, a path of length N can have its positions represented by their numerical position, starting with zero
 
+# TODO rebuild the rest of this
+
 ### Constructing bits
 A bit is a path of length two. At any given time, it can occupy one of its positions or the other.
 
-let bit = Path<Nil,true,true,Nil>
+(alias Bit (+ true true))
 
 Note that while there is no global representation of falsehood, something that means "false" to a subdomain can
 be constructed. 
-let false = bit(0);
-let true = bit(1);
-
-### Constructing bounded size integers
+```
+(alias (false,true) (Bit _ _));
+```
+### Constructing bounded integers
 
 #### Bytes
 A byte exists as a useful concept because it matches machine architecture of 8 bits. 
@@ -279,8 +358,8 @@ Following the same rules established for base 10 integers above, but with dimens
 ten, and a maximum of 8 dimensions. These can be constructed as 
 
 ```
-alias Byte = Path<Nil,bit,bit,bit,bit,bit,bit,bit,bit,Nil>
-byte(true,false,true,true,true,true,false,true)
+(alias Byte(? (Bit,Bit,Bit,Bit,Bit,Bit,Bit,Bit)) (
+( Byte true false true true true true false true)
 ```
 
 where each of those true and false values actually actually bit paths from above
@@ -289,13 +368,13 @@ where each of those true and false values actually actually bit paths from above
 or with compact notation where true is 1, false is 0 and the comman delimiter is implied:
 
 ```
-byte(10111101);
+Byte(10111101);
 ```
 
 Since an 8 dimensional byte can be represented by it's one dimensional flattening,
 there is an isomorphism between a byte and the integers from 0-127. Therefore an alternate representation of a byte is
 ```
-189 ? byte => byte(10111101)
+(? 189 ? byte => byte(10111101)
 ```
 This returns the byte viewed in its canonical form, and can be read as
 Construct the integer that is isomophic to byte 189, and then observe it as a native 8 dimensional byte.
@@ -445,3 +524,76 @@ Observation and destructuring can also have nested structure
 ```
 ((3+3),(4+5)) ?= (Byte(_),(_,_)) => (00000110,(4,5))
 ```
+
+
+
+```
+
+(? (_) (+ 2 4) )
+=> 6
+
+(? (A) (+ 2 4) )
+=> A=6
+
+(? (A) (+ 2 4 8) )
+=> A=14
+
+(? (A,B) (+ 2 4 8) )
+=> (A=14 B=0) (A=13 B=1)
+
+(? (_) (* 2 4) )
+=> 8
+
+(? (B) (* 2 4) )
+=> B=8
+
+(? (_,_) (+ 2 4))
+=> (+ 2 4)
+
+(? (*,A,B) (* 2 4))
+=> (* A=2 B=4)
+
+let A =(_)
+let B = (_,_)
+
+(? A (* 2 4))
+=> A=8
+
+(? B (* 2 4))
+=> B=(* 2 4)
+
+(? (+ A B) (+ 5))
+//what is the path that includes all the possible solutions to splitting 5 into two parts?
+=> (+ 1 4) (+ 2 3) (+ 3 2) (+ 2 3) (+ 1 4) (+ 0 5)
+
+? Observation Structure
+=> Solution
+
+(? Byte(A) 8)
+=> Byte<bit,bit,bit,bit,bit,bit,bit,bit,bit>[*0*2^8 0,0,0,1,1,1,0]
+Where bit is defined as (+ Zero One)
+
+
+let TwoBit = (* 1*2^1 0)
+=> TwoBit(10)
+? (_) TwoBit(10)
+=> 2
+
+
+(+ 2 3 4)
+(* 2 3)
+
+and Byte defined as 
+
+? Byte(A B C D E F G H) 8
+=> A=0 B=0 C=0 D=0 E=1 F=1 G=1 H=1
+
+(* A*2^8 B*2^7 C*2^6 D*2^5 E*2^4 F*2^3 (G*2^2 (H*2^1)))
+
+
+
+
+
+
+```
+

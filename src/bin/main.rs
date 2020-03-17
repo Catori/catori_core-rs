@@ -1,171 +1,137 @@
-use std::marker::PhantomData;
-use log::{error,warn,info};
+use lexpr::{
+    parse::Error as ParseError,
+    Value as SExprValue,
+    Value::{Cons, Nil, Null, Number, Symbol},
+};
+use log::info;
 
-extern crate catori_core;
-use catori_core::Free;
-//struct Particle<C, H, T>(PhantomData<C>, H, T);
-//type Food<C> = Particle<C,(),()>;
-use catori_core::*;
-#[derive(Ord,PartialOrd,Eq,PartialEq,Default)]
-struct Food<C, H: Catori>(PhantomData<C>, H);
+fn main() -> Result<(), ParseError> {
+    let mut sexprs = vec![];
+    sexprs.push("(true)");
+    sexprs.push("(true true)");
+    sexprs.push("(true (true true) true)");
+    sexprs.push("(true (true true) true)");
+    sexprs.push("(* true true)");
+    sexprs.push("(* (true true) (true))");
+    sexprs.push("(* (true true true) (true true))");
+    sexprs.push("(true true true true (3 1))");
 
+    // Access parts of the data by indexing with square brackets.
+    //    println!("Please call {} at the number {}", v["name"], v["phones"][1]);
 
-#[derive(Ord,PartialOrd,Eq,PartialEq,Default)]
-struct Grass {}
-//#[derive(Ord,PartialOrd,Eq,PartialEq,Default)]
-trait Meat: Free {}
-
-#[derive(Ord,PartialOrd,Eq,PartialEq,Default)]
-struct Animal<Food> {
-    food: Food,
-}
-#[derive(Ord,PartialOrd,Eq,PartialEq,Default)]
-struct Lion();
-#[derive(Ord,PartialOrd,Eq,PartialEq,Default)]
-struct Cow();
-
-///In any Context C, the existence of Meat implies a path to Food
-///impl<C, H: Category,MEAT:Meat> Path<Food<C, H>> for MEAT {}
-///In any Context C, the existence of Grass implies a path to Food
-impl<CONTEXT, HERE: Catori> Path<Food<CONTEXT, HERE>> for Grass
-    where CONTEXT: Path<Nil<CONTEXT>>
-{
-    type Context = CONTEXT;
-    type There = Nil<CONTEXT>;
-
-    fn next(self) -> Self::There {
-
-        Self::There::default()
+    for sexpr in sexprs {
+        let lexpr: SExprValue = lexpr::from_str(sexpr).unwrap();
+        println!("original form:       {}", sexpr);
+        println!("parsed debug form:   {:?}", lexpr.clone());
+        println!("parsed simple form:  {}", lexpr.clone());
+        println!("catori Form:         {}", PathWrapper(&lexpr.clone()).simple());
+        println!("catori condensed:    {}", PathWrapper(&lexpr.clone()).condense());
+        println!("catori flattened:    {}", PathWrapper(&lexpr.clone()).flatten());
+        println!("catori Size:         {}\n", PathWrapper(&lexpr).size());
+        //        dbg!(lexpr);
     }
+    Ok(())
+}
+
+enum Error {}
+
+trait Path {
+    fn simple(self) -> String;
 }
 
 
-///The existence of a Lion implies a path to Meat
-///impl Path<Meat> for Lion {}
-///The existence of a Lion implies the existence of a path from Animal to Meat
-///impl Path<Animal<Meat>> for Lion {}
-///The existence of a Cow implies the existence of a path from Animal to Grass
-impl Path<Animal<Grass>> for Cow {
-    type Context = Animal<Grass>;
-    type There = Nil<Self::Context>;
-    fn next(self) -> Self::There {
 
-        Self::There::default()
+struct PathWrapper<'a>(&'a SExprValue);
+
+impl<'a> PathWrapper<'a> {
+    fn simple(self) -> String {
+        match self.0 {
+            Null => "".to_string(),
+            Number(num) => format!("{}", &num.to_string()),
+            Symbol(sym) => format!("{}", &sym.to_string()),
+            Number(num) => format!("{}", &num.to_string()),
+            Cons(cons) => format!(
+                "( {} {} )",
+                &PathWrapper(cons.car()).simple(),
+                &PathWrapper(cons.cdr()).simple()
+            ),
+            _ => unimplemented!(),
+        }
     }
-}
-///The existence of a Cow implies the existence of Grass
-impl Path<Cow> for Grass {
-    type Context = Animal<Grass>;
-    type There = Nil<Self::Context>;
-    fn next(self) -> Self::There {
 
-        Self::There::default()
-    }}
-///The existence of Grass implies a Path to Cow
-impl Path<Grass> for Cow {
-    type Context = Animal<Grass>;
-    type There = Nil<Self::Context>;
-
-    fn next(self) -> Self::There {
-
-        Self::There::default()
-    }}
-///Lions can acquire Meat
-
-trait Consumer<HERE: Path<THERE>, THERE: Free>: Path<HERE, There = THERE> {
-    fn consume(here: HERE, _there: THERE) -> HERE {
-        here
+    fn condense(self) -> String {
+        self._condense(false)
     }
-}
 
-impl<PATH: Path<HERE>, HERE: Default> Consumer<HERE, <PATH as Path<HERE>>::There> for PATH
-    where HERE: Path<<PATH as Path<HERE>>::There>
-{
-}
+    fn _condense(self, in_cons: bool) -> String {
+        match self.0 {
+            Null => "".to_string(),
+            Cons(cons) => format!(
+                "{}{}{}{}",
+                {
+                    if !in_cons {
+                        ("( ")
+                    } else {
+                        ""
+                    }
+                },
+                &PathWrapper(cons.car())._condense(false),
+                &PathWrapper(cons.cdr())._condense(true),
+                if !in_cons { (") ") } else { "" }
+            ),
+            Number(num) => format!("{} ", &num.to_string()),
+            Symbol(sym) => format!("{} ", &sym),
 
-trait Eater<FOOD: Free>: Consumer<Self, FOOD>
-    where Self: Path<FOOD>
-{
-    fn eats(self, _food: FOOD) -> Self {
-        //Consumer::consume(self,food)
-        self
+            _ => unimplemented!(),
+        }
     }
-}
 
-trait Getter<FOOD: Default>: Path<FOOD> {
-    fn gets(self) -> FOOD {
-        FOOD::default()
+    pub fn flatten(self) -> String {
+        self._flatten(false)
     }
-}
 
+    fn _flatten(self, in_cons: bool) -> String {
+        match self.0 {
+            Null => "".to_string(),
+            Number(num) => num.to_string(),
+            Symbol(sym) => {
+                match sym.clone().into_string().as_str() {
+                    "true" => "true".to_string(),
+                    "*" => "*".to_string(),//panic!(),
+                    str => panic!("invalid symbol {}", sym)
+                }
+            },
+            Cons(cons) => format!(
+                "{} {}{}{}",
+                {
+                    if !in_cons {
+                        ("(")
+                    } else {
+                        ""
+                    }
+                },
 
-
-impl Getter<Lion> for Lion {}
-///Cows can acquire Grass
-impl Getter<Grass> for Cow {}
-///Lions can consume Meat
-// impl Eater<<Lion as Path<Lion>>::T> for Path<Lion>
-// {
-// }
-///Cows can consume Grass
-//impl Eater<<Cow as Path<Cow>>::T> for Cow {}
-
-
-
-//
-// fn main() {
-//     let _leo = Lion::default();
-//     let _milka = Cow::default();
-//     //let meat: Meat = Meat::default();
-//     //leo.eats(meat);
-//     // milka.eats(milka.gets());
-//     //milka.eats(leo.gets());
-//     //let lambda: Animal<F> = Animal::default();
-//
-//     //     let ua = UA{};
-//     // type a = ua::h;
-//     //     struct B();
-//     //   let A = Universe
-//     //   type AA = Path
-//     //   type B = Universe<Nil,A,B>;
-// }
-
-//use serde_lexpr::{from_str, to_string};
-use lexpr::{sexp,Value,Cons};
-
-
-// #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-// struct Observation(, String, u8);
-
-struct Observation {
-    lens: Cons,
-    path: Cons,
-}
-
-fn main() {
-    // let v1: Vec<u32> = from_str("(1 2 3)").unwrap();
-    // assert_eq!(v1, vec![1, 2, 3]);
-    // assert_eq!(to_string(&v1).unwrap(), "(1 2 3)".to_string());
-    // let v2: Vec<u32> = from_str("#(1 2 3)").unwrap();
-    // assert_eq!(v1, v2);
-    // assert_eq!(to_string(&v2).unwrap(), "(1 2 3)".to_string());
-    // dbg!(v1);
-    // dbg!(v2);
-    //
-    //
-    // let address = sexp!(((name . "Jane Doe") (street . "4026 Poe Lane")));
-    // dbg!(address);
-    //
-    //
-    // let names = Value::list(vec!["Alice", "Bob", "Mallory"]);
-    // println!("The bad guy is {}", names[2].as_str().unwrap());
-    let string = "(? _ 3)";
-    let catexp = lexpr::from_str(&string).expect("parsing failed");
-
-    match catexp[0].as_symbol().unwrap() {
-        "?" => Observation{lens: *catexp[1].as_cons().unwrap(), path: *catexp[2].as_cons().unwrap()},
-        other=> {todo!("{:?} not supported. Can only observe with ?", other);panic!()}
+                PathWrapper(cons.car())._flatten(true),
+                PathWrapper(cons.cdr())._flatten(true),
+                {
+                    if !in_cons {
+                        " )"
+                    } else {
+                        ""
+                    }
+                }
+            ),
+            _ => unimplemented!(),
+        }
     }
-   // let catexp:Cons = from_str("(?)").unwrap();
-    dbg!(catexp);
+
+    fn size(&self) -> usize {
+        match &self.0 {
+            Nil | Null => 0,
+            Cons(sexpr) =>
+                PathWrapper(sexpr.car()).size() +
+                PathWrapper(sexpr.cdr()).size(),
+            _ => 1,
+        }
+    }
 }

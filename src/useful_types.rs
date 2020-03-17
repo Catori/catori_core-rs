@@ -10,7 +10,7 @@ pub struct BitString<'a, C:Catori,Bit> {
 //        bit:Bit,
 //        next: Box<BitString>,
 //    },
-//    Nil,
+//    Nil,esdf
 }
 
 
