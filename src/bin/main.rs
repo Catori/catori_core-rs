@@ -6,6 +6,7 @@ use lexpr::{
 };
 use log::info;
 use std::convert::TryInto;
+use std::fmt::Formatter;
 use std::ops::Add;
 
 fn main() -> Result<(), Error> {
@@ -22,29 +23,79 @@ fn main() -> Result<(), Error> {
 
     for sexpr in sexprs {
         println!("original form:              {}", sexpr);
-        print_forms(lexpr::from_str(sexpr).unwrap())?
+        print_forms(Path::Expr(lexpr::from_str(sexpr).unwrap()))?
     }
     Ok(())
 }
 
-fn print_forms(sexpr: impl Path) -> Result<(), Error> {
-    let truth = lexpr::from_str("true").unwrap();
-    println!("lexpr debug form:           {}", &sexpr.expand());
-    println!("lexpr simple form:          {}", sexpr.to_string());
-    println!("catori Form:                {}", &sexpr.clone().explicit());
-    println!("catori condensed:           {}", &sexpr.clone().condense());
-    println!("catori flattened:           {}", &sexpr.clone().flatten());
-    println!("catori length:              {}", &sexpr.length());
-    println!("addition:                   {}", &sexpr.sum(truth));
+fn print_forms(path: Path) -> Result<(), Error> {
+    let two_truth = Path::Expr(lexpr::from_str("((true true))").unwrap());
+    println!("lexpr debug form:           {}", &path.expand());
+    println!("lexpr simple form:          {}", path.to_string());
+    println!("catori Form:                {}", &path.clone().explicit());
+    println!("catori condensed:           {}", &path.clone().condense());
+    println!("catori flattened:           {}", &path.clone().flatten());
+    println!("catori length:              {}", &path.length());
+    println!("addition:                   {}", &path.sum(two_truth.clone()));
+    println!("multiplication:             {}", &path.product(two_truth));
     // println!("default observation:        {}\n", &lexpr.observe("()".to_string()));
     //  println!("split at two:        {}\n", &lexpr.observe(Some(sub_two_lens))?);
     println!();
     Ok(())
 }
 
-pub trait Path: Sized + Display + Clone {
+#[derive(Debug, Clone)]
+pub enum Path {
+    Expr(SExprValue),
+    String(String),
+}
+
+impl Path {
     //MINIMAL OPERATORS
     //observation is eager, sum and product are lazy
+
+    ///Concatenation is the same as addition in one dimensional catori space
+    /// Only two *like* things can be concatenated, but "like" is in the eye of the beholder.
+    /// From the perspective of abstract paths, all paths are "alike"
+    /// This is also an AND gate, as the two inputs both have to be not null in order
+    /// for this to be a meaningful operation. Nil is not occupyable, therefore can't be concatenated
+    /// with anything
+    /// It's also the plus '+" operator
+    /// Summation neither creates nor destroys information
+    /// This operation can be visualized as taking two paths that are already pointed in the same direction
+    /// and abutting them end to end
+    fn sum(&self, other: Self) -> Self {
+        let path: Value = match self {
+            Path::String(str) => lexpr::from_str(str).unwrap(),
+            Path::Expr(expr) => expr.clone(),
+        };
+
+        let other: Value = match other {
+            Path::String(str) => lexpr::from_str(&str).unwrap(),
+            Path::Expr(expr) => expr.clone(),
+        };
+        Path::Expr(Cons(ConsCell::new(path, other)))
+    }
+    ///This is multiplication and is the only way that things can combine to be more than the sum of their parts
+    ///This can be considered shorthand for the impossibly laborious construction of the entire problem
+    /// space using ANDs and specifying every single truth value manually
+    ///
+    ///This can be visualized as taking 2 paths that exist perpendicular to each other, and creating a 2 dimensional
+    /// field/space/array out of them
+    /// Like summation, this is a lazy operation
+    fn product(&self, other: Self) -> Self {
+        let path: Value = match self {
+            Path::String(str) => lexpr::from_str(str).unwrap(),
+            Path::Expr(expr) => expr.clone(),
+        };
+
+        let other: Value = match other {
+            Path::String(str) => lexpr::from_str(&str).unwrap(),
+            Path::Expr(expr) => expr.clone(),
+        };
+        let cons = Cons(ConsCell::new(path, other));
+        Path::Expr(Cons(ConsCell::new("*", cons)))
+    }
 
     ///observing a path through another path (using it as a lens) causes the observed path
     ///to collapse into the shape (lens) that the observer is expecting.
@@ -55,122 +106,47 @@ pub trait Path: Sized + Display + Clone {
     /// see also  https://en.wikipedia.org/wiki/Functional_completeness
     /// This is the question mark '?' operator
     /// observation can't create any new information and but does destroy it
-    fn observe(&self, other: Self) -> Self;
-
-    ///Concatenation is the same as addition in one dimensional catori space
-    /// Only two *like* things can be concatenated, but "like" is in the eye of the beholder.
-    /// From the perspective of abstract paths, all paths are "alike"
-    /// This is an AND gate, as the two inputs both have to be not null in order
-    /// for this to be a meaningful operation. Nil is not occupyable, therefore can't be concatenated
-    /// with anything
-    /// this is the plus '+" operator
-    /// Summation neither creates nor destroys information
-    /// This can be visualized as taking two paths that are already pointed in the same direction
-    /// and putting them end to end
-    fn sum(&self, other: Self) -> Self;
-
-    ///This is multiplication and is the only way that things can combine to be more than the sum of their parts
-    ///This can be considered shorthand for the impossibly laborious construction of the entire problem
-    /// space using ANDs and specifying every single (true) manually
-    ///
-    ///This can be visualized as taking 2 paths that exist perpendicular to each, and creating a 2 dimensional
-    /// field/space/array out of them
-    /// Like summation,
-    fn product(&self, other: Self) -> Result<Self, Error>;
-
-    //VISUALIZATION UTILITIES
-    //TODO demonstrate that these can all be implemented in terms of the primitives above
-
-    ///Converts any path into an Sexpression and generates the fully expanded form
-    fn expand(&self) -> String;
-    ///Displays any path in its explicit catori form that elides Cons and uses + instead,
-    ///but still includes full nesting
-    fn explicit(&self) -> String;
-    ///Generates the condensed human readable form of a catori path
-    fn condense(&self) -> String;
-    ///Iterates through a nested path and flattens all structures
-    fn flatten(&self) -> String;
-    ///Calculates the full size of all nested paths recursively
-    fn size(&self) -> u64;
-    ///Iterates through top level paths without recursing into nested ones
-    ///and generates the linear length of the path
-    fn length(&self) -> u64;
-}
-
-// impl Path for String {
-//     fn expand(&self) -> String {
-//         lexpr::from_str(&self).unwrap().expand()
-//     }
-//
-//     fn explicit(&self) -> String {
-//         lexpr::from_str(&self).unwrap().explicit()
-//     }
-//
-//     fn condense(&self) -> String {
-//         lexpr::from_str(&self).unwrap().condense()
-//     }
-//
-//     fn flatten(&self) -> String {
-//         lexpr::from_str(&self).unwrap().flatten()
-//     }
-//
-//     fn size(&self) -> u64 {
-//         lexpr::from_str(&self).unwrap().size()
-//     }
-//
-//     fn length(&self) -> u64 {
-//         lexpr::from_str(&self).unwrap().length()
-//     }
-//
-//     fn observe(&self, other: Self) -> Self {
-//         lexpr::from_str(&self)
-//             .unwrap()
-//             .observe(lexpr::from_str(&other).unwrap())
-//             .to_string()
-//     }
-//
-//     fn sum(&self, other: Self) -> Self {
-//         lexpr::from_str(&self)
-//             .unwrap()
-//             .sum(lexpr::from_str(&other).unwrap())
-//             .to_string()
-//     }
-//
-//     fn product(&self, other: Self) -> Result<Self, Error> {
-//         unimplemented!()
-//     }
-// }
-
-#[derive(Debug)]
-pub enum Error {}
-
-impl Path for SExprValue {
-    fn observe(&self, other: Self) -> Self {
+    ///Experimentally caling this "filter" because it only allows the things through where there are holes
+    /// might also be called interfere or destruct
+    fn filter(&self, other: Self) -> Self {
+        match self.length() == other.length() {
+            true => {}
+            false => {}
+        }
         todo!(
             "recursively XOR both sides. only output something when there is a 
         hole on one side and a path on the other"
         );
     }
 
-    fn sum(&self, other: Self) -> Self {
-        Value::Cons(ConsCell::new(self.clone(), other))
-    }
+    //todo add alias function?
 
-    fn product(&self, other: Self) -> Result<Self, Error> {
-        unimplemented!()
-    }
+    //VISUALIZATION UTILITIES
+    //TODO demonstrate that these can all be implemented in terms of the primitives above
 
+    ///Converts any path into an Sexpression and generates the fully expanded form
     fn expand(&self) -> String {
         format!("{:?}", &self)
     }
 
+    ///Displays any path in its explicit catori form that elides Cons and uses + instead,
+    ///but still includes full nesting
     fn explicit(&self) -> String {
-        match self {
-            Null => "".to_string(),
+        let path: Value = match self {
+            Path::String(str) => lexpr::from_str(str).unwrap(),
+            Path::Expr(expr) => expr.clone(),
+        };
+        match path {
+            Null => "()".to_string(),
             Number(num) => format!("{}", &num.to_string()),
             Symbol(sym) => format!("{}", &sym.to_string()),
             Number(num) => format!("{}", &num.to_string()),
-            Cons(cons) => format!("( {} {} )", cons.car().explicit(), cons.cdr().explicit()),
+            Cons(cons) => format!(
+                "( {} {} )",
+                Path::Expr(cons.car().clone()).explicit(),
+                Path::Expr(cons.cdr().clone()).explicit()
+            ),
+            SString(string) => format!("{}", string.to_string()),
             _ => unimplemented!(),
         }
     }
@@ -178,7 +154,11 @@ impl Path for SExprValue {
     ///Condensing is just a convenient human readable form that should be identical
     /// to the simple form generated by sexpr library
     fn condense(&self) -> String {
-        fn _condense(value: &SExprValue, in_cons: bool) -> String {
+        fn _condense(value: &Path, in_cons: bool) -> String {
+            let value: Value = match value {
+                Path::String(str) => lexpr::from_str(str).unwrap(),
+                Path::Expr(expr) => expr.clone(),
+            };
             match value {
                 Null => "".to_string(),
                 Cons(cons) => format!(
@@ -190,22 +170,28 @@ impl Path for SExprValue {
                             ""
                         }
                     },
-                    _condense(cons.car(), false),
-                    _condense(cons.cdr(), true),
-                    if !in_cons { (") ") } else { "" }
+                    _condense(&Path::Expr(cons.car().clone()), false),
+                    _condense(&Path::Expr(cons.cdr().clone()), true),
+                    if !in_cons { ") " } else { "" }
                 ),
                 Number(num) => format!("{} ", &num.to_string()),
                 Symbol(sym) => format!("{} ", &sym),
+                SString(string) => format!("{} ", string.to_string()),
 
-                _ => unimplemented!(),
+                wtf => unimplemented!("{}", wtf),
             }
         }
         _condense(self, false)
     }
 
+    ///Iterates through a nested path and flattens all structures
     fn flatten(&self) -> String {
-        fn _flatten(value: &SExprValue, in_cons: bool) -> String {
-            match value {
+        fn _flatten(value: &Path, in_cons: bool) -> String {
+            let path: Value = match value {
+                Path::String(str) => lexpr::from_str(str).unwrap(),
+                Path::Expr(expr) => expr.clone(),
+            };
+            match path {
                 Null => "".to_string(),
                 Number(num) => num.to_string(),
                 Symbol(sym) => {
@@ -224,8 +210,8 @@ impl Path for SExprValue {
                             ""
                         }
                     },
-                    _flatten(cons.car(), true),
-                    _flatten(cons.cdr(), true),
+                    _flatten(&Path::Expr(cons.car().clone()), true),
+                    _flatten(&Path::Expr(cons.cdr().clone()), true),
                     {
                         if !in_cons {
                             " )"
@@ -238,22 +224,51 @@ impl Path for SExprValue {
             }
         }
 
-        _flatten(self, false)
+        _flatten(&self, false)
     }
 
+    ///Calculates the full size of all nested paths recursively
     fn size(&self) -> u64 {
-        match &self {
+        let path = match self {
+            Path::String(str) => lexpr::from_str(str).unwrap(),
+            Path::Expr(expr) => expr.clone(),
+        };
+        match path {
             Nil | Null => 0,
-            Cons(sexpr) => sexpr.car().size() + sexpr.cdr().size(),
+            Cons(sexpr) => Path::Expr(sexpr.car().clone()).size() + Path::Expr(sexpr.cdr().clone()).size(),
             _ => 1,
         }
     }
 
+    ///Iterates through top level paths without recursing into nested ones
+    ///and generates the linear length of the path
     fn length(&self) -> u64 {
-        match &self {
+        let path = match self {
+            Path::String(str) => lexpr::from_str(str).unwrap(),
+            Path::Expr(expr) => expr.clone(),
+        };
+        match path {
             Nil | Null => 0,
-            Cons(sexpr) => 1 + sexpr.cdr().length(),
+            Cons(sexpr) => 1 + Path::Expr(sexpr.cdr().clone()).length(),
             _ => 1,
         }
     }
 }
+
+impl Display for Path {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        match self {
+            Path::String(string) => {
+                write!(f, "{}", string);
+                Ok(())
+            }
+            Path::Expr(expr) => {
+                write!(f, "{}", expr);
+                Ok(())
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+enum Error {}
