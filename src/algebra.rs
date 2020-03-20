@@ -1,9 +1,10 @@
-use crate::{Dimension, Path, Nil, Catori, Measure};
-use core::ops::Add;
+use crate::{Catori, Dimension, Measure, Nil, Path};
 use core::marker::PhantomData;
+use core::ops::Add;
 
 trait Semigroup<HERE>
-    where HERE: Path<<Self as Semigroup<HERE>>::There>
+where
+    HERE: Path<<Self as Semigroup<HERE>>::There>,
 {
     type Context;
     type There;
@@ -11,16 +12,17 @@ trait Semigroup<HERE>
 }
 
 trait Monoid<HERE>: Semigroup<HERE>
-    where HERE: Path<<Self as Semigroup<HERE>>::There>
+where
+    HERE: Path<<Self as Semigroup<HERE>>::There>,
 {
     type Context;
     type Empty;
 }
 
-
 impl<CONTEXT, HERE, THERE> Semigroup<HERE> for Dimension<CONTEXT, HERE, THERE>
-    where HERE: Path<HERE> + Path<THERE> + Add<Output = HERE>,
-          THERE: Path<HERE>
+where
+    HERE: Path<HERE> + Path<THERE> + Add<Output = HERE>,
+    THERE: Path<HERE>,
 {
     type Context = CONTEXT;
     type There = HERE;
@@ -29,9 +31,9 @@ impl<CONTEXT, HERE, THERE> Semigroup<HERE> for Dimension<CONTEXT, HERE, THERE>
     }
 }
 
-
 impl<CONTEXT, HERE> Monoid<HERE> for Dimension<CONTEXT, HERE, HERE>
-    where HERE: Path<HERE> + Add<Output = HERE>
+where
+    HERE: Path<HERE> + Add<Output = HERE>,
 {
     type Context = CONTEXT;
     type Empty = Nil<CONTEXT>;
@@ -73,7 +75,8 @@ pub type N8 = Pred<N7>;
 pub type N9 = Pred<N8>;
 
 impl<Rhs> Add<Rhs> for Nil<()>
-    where Rhs: Peano<Rhs>
+where
+    Rhs: Peano<Rhs>,
 {
     type Output = Rhs;
     fn add(self, _rhs: Rhs) -> Self::Output {
@@ -82,9 +85,10 @@ impl<Rhs> Add<Rhs> for Nil<()>
 }
 
 impl<Lhs, Rhs> Add<Rhs> for Succ<Lhs>
-    where Lhs: NonNeg<Lhs> + Add<Rhs>,
-          Rhs: NonNeg<Rhs>,
-          <Lhs as Add<Rhs>>::Output: NonNeg<<Lhs as Add<Rhs>>::Output>
+where
+    Lhs: NonNeg<Lhs> + Add<Rhs>,
+    Rhs: NonNeg<Rhs>,
+    <Lhs as Add<Rhs>>::Output: NonNeg<<Lhs as Add<Rhs>>::Output>,
 {
     type Output = Succ<<Lhs as Add<Rhs>>::Output>;
     #[allow(unused_variables)]
@@ -94,9 +98,10 @@ impl<Lhs, Rhs> Add<Rhs> for Succ<Lhs>
 }
 
 impl<Lhs, Rhs> Add<Rhs> for Pred<Lhs>
-    where Lhs: NonPos<Lhs> + Add<Rhs>,
-          Rhs: NonPos<Rhs>,
-          <Lhs as Add<Rhs>>::Output: NonPos<<Lhs as Add<Rhs>>::Output>
+where
+    Lhs: NonPos<Lhs> + Add<Rhs>,
+    Rhs: NonPos<Rhs>,
+    <Lhs as Add<Rhs>>::Output: NonPos<<Lhs as Add<Rhs>>::Output>,
 {
     type Output = Pred<<Lhs as Add<Rhs>>::Output>;
     fn add(self, _rhs: Rhs) -> Self::Output {
@@ -105,8 +110,9 @@ impl<Lhs, Rhs> Add<Rhs> for Pred<Lhs>
 }
 
 impl<Lhs, Rhs> Add<Succ<Rhs>> for Pred<Lhs>
-    where Lhs: NonPos<Lhs> + Add<Rhs>,
-          Rhs: NonNeg<Rhs>
+where
+    Lhs: NonPos<Lhs> + Add<Rhs>,
+    Rhs: NonNeg<Rhs>,
 {
     type Output = <Lhs as Add<Rhs>>::Output;
     fn add(self, _rhs: Succ<Rhs>) -> Self::Output {
@@ -115,8 +121,9 @@ impl<Lhs, Rhs> Add<Succ<Rhs>> for Pred<Lhs>
 }
 
 impl<Lhs, Rhs> Add<Pred<Rhs>> for Succ<Lhs>
-    where Lhs: NonNeg<Lhs> + Add<Rhs>,
-          Rhs: NonPos<Rhs>
+where
+    Lhs: NonNeg<Lhs> + Add<Rhs>,
+    Rhs: NonPos<Rhs>,
 {
     type Output = <Lhs as Add<Rhs>>::Output;
     #[allow(unused_variables)]

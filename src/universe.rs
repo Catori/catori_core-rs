@@ -1,12 +1,13 @@
 use core::marker::PhantomData;
 
-use crate::{Catori, Path};
 use crate::nil::Nil;
+use crate::{Catori, Path};
 use fixedvec::FixedVec;
 
-#[derive(Eq,PartialEq,Ord,PartialOrd,Clone,Default)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Default)]
 pub struct Dimension<CONTEXT, HERE, THERE>
-    where HERE: Path<THERE>
+where
+    HERE: Path<THERE>,
 {
     phantom: PhantomData<CONTEXT>,
     h: HERE,
@@ -14,7 +15,6 @@ pub struct Dimension<CONTEXT, HERE, THERE>
 }
 
 //  type Qubit = Dimension;
-
 
 //impl<CONTEXT,H,T> Path<CONTEXT> for Bit<CONTEXT,H,T> {
 
@@ -46,25 +46,31 @@ pub struct Dimension<CONTEXT, HERE, THERE>
 //     }
 // }
 
-
 //type Bit<CONTEXT,H,T> = Dimension<CONTEXT,H,T>;
 
 //impl<BIT:False> Path<BIT> for Bool{}
 
 ///A Dimension is the concrete implementation of a Univalent Path
 impl<CONTEXT, HERE, THERE> Catori for Dimension<CONTEXT, HERE, THERE>
-    where CONTEXT: Path<HERE>,
-          HERE: Path<THERE>,
-          THERE: Catori
+where
+    CONTEXT: Path<HERE>,
+    HERE: Path<THERE>,
+    THERE: Catori,
 {
 }
 
 ///A space is a bag of dimensions that are all valid within the same CONTEXT
-pub struct Universe<CONTEXT, HERE:'static+Copy, THERE:'static+Copy>(PhantomData<CONTEXT>, FixedVec<'static, (HERE, THERE)>) where HERE: Path<THERE>;
+pub struct Universe<CONTEXT, HERE: 'static + Copy, THERE: 'static + Copy>(
+    PhantomData<CONTEXT>,
+    FixedVec<'static, (HERE, THERE)>,
+)
+where
+    HERE: Path<THERE>;
 
 trait Wave<WAVE, HERE, THERE>: Path<WAVE> + Path<HERE>
-    where WAVE: Path<WAVE> + Path<HERE>,
-          HERE: Path<THERE>
+where
+    WAVE: Path<WAVE> + Path<HERE>,
+    HERE: Path<THERE>,
 {
     type Here;
     type There;
@@ -73,9 +79,10 @@ trait Wave<WAVE, HERE, THERE>: Path<WAVE> + Path<HERE>
 }
 
 impl<WAVE, HERE: Default, THERE, PATH> Wave<WAVE, HERE, THERE> for PATH
-    where WAVE: Path<HERE>,
-          PATH: Path<HERE> + Path<WAVE>,
-          HERE: Path<THERE>
+where
+    WAVE: Path<HERE>,
+    PATH: Path<HERE> + Path<WAVE>,
+    HERE: Path<THERE>,
 {
     type Here = HERE;
     type There = THERE;
@@ -88,9 +95,10 @@ impl<WAVE, HERE: Default, THERE, PATH> Wave<WAVE, HERE, THERE> for PATH
 
 ///CONTEXT has a Dimension that provides a path from Here to There
 impl<CONTEXT, HERE, THERE> Path<HERE> for Dimension<CONTEXT, HERE, THERE>
-    where CONTEXT: Path<HERE>,
-          HERE: Path<THERE>,
-          THERE: Path<THERE>
+where
+    CONTEXT: Path<HERE>,
+    HERE: Path<THERE>,
+    THERE: Path<THERE>,
 {
     type Context = CONTEXT;
     type There = THERE;
@@ -102,21 +110,27 @@ impl<CONTEXT, HERE, THERE> Path<HERE> for Dimension<CONTEXT, HERE, THERE>
 //A Qubit is the abstract idea of a Bit
 pub trait Qubit<HERE>: Path<HERE> {}
 
-#[derive(Ord,Eq,PartialEq,PartialOrd)]
+#[derive(Ord, Eq, PartialEq, PartialOrd)]
 pub enum Bit<CONTEXT, HERE>
-    where CONTEXT: Path<HERE> + Path<Nil<CONTEXT>>,
-          HERE: Path<HERE>
+where
+    CONTEXT: Path<HERE> + Path<Nil<CONTEXT>>,
+    HERE: Path<HERE>,
 {
     False(Nil<CONTEXT>),
     True(HERE),
     Phantom(PhantomData<CONTEXT>),
 }
 
-trait BitSeq<CONTEXT, HERE>: Path<HERE, Context = CONTEXT> where CONTEXT: Path<HERE> {}
+trait BitSeq<CONTEXT, HERE>: Path<HERE, Context = CONTEXT>
+where
+    CONTEXT: Path<HERE>,
+{
+}
 
 impl<CONTEXT, HERE> Default for Bit<CONTEXT, HERE>
-    where CONTEXT: Path<HERE> + Path<Nil<CONTEXT>>,
-          HERE: Path<Nil<HERE>>
+where
+    CONTEXT: Path<HERE> + Path<Nil<CONTEXT>>,
+    HERE: Path<Nil<HERE>>,
 {
     fn default() -> Bit<CONTEXT, HERE> {
         Bit::False(Nil::default())
@@ -124,13 +138,13 @@ impl<CONTEXT, HERE> Default for Bit<CONTEXT, HERE>
 }
 
 impl<CONTEXT, HERE> Path<HERE> for Bit<CONTEXT, HERE>
-    where CONTEXT: Path<HERE> + Path<Nil<CONTEXT>>,
-          HERE: Path<Nil<HERE>>
+where
+    CONTEXT: Path<HERE> + Path<Nil<CONTEXT>>,
+    HERE: Path<Nil<HERE>>,
 {
     type Context = CONTEXT;
     type There = Nil<HERE>;
     fn next(self) -> Self::There {
-
         Self::There::default()
     }
 }
@@ -142,7 +156,8 @@ impl<CONTEXT, HERE> Path<HERE> for Bit<CONTEXT, HERE>
 //impl Path<
 
 trait Collider<CONTEXT>
-    where <Self as Collider<CONTEXT>>::Here: Path<<Self as Collider<CONTEXT>>::There>
+where
+    <Self as Collider<CONTEXT>>::Here: Path<<Self as Collider<CONTEXT>>::There>,
 {
     type Here;
     type There;
@@ -157,7 +172,8 @@ trait Collider<CONTEXT>
 ///a noop. But it sets the stage for specializing other collision types.
 ///If there is a path between two things, they an collide
 impl<CONTEXT, HERE, THERE> Collider<CONTEXT> for Dimension<CONTEXT, HERE, THERE>
-    where HERE: Path<THERE>
+where
+    HERE: Path<THERE>,
 {
     type Here = HERE;
     type There = THERE;

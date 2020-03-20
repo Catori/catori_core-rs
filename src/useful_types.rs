@@ -1,23 +1,18 @@
-use crate::{Catori, Path, Nil};
+use crate::{Catori, Nil, Path};
 use core::marker::PhantomData;
 
-#[derive(Ord,PartialOrd,Eq,PartialEq, Default)]
-pub struct BitString<'a, C:Catori,Bit> {
+#[derive(Ord, PartialOrd, Eq, PartialEq, Default)]
+pub struct BitString<'a, C: Catori, Bit> {
     phantom: PhantomData<C>,
     bit: Bit,
-    next: Option<&'a BitString<'a, C,Bit>>
-//    Bit{
-//        bit:Bit,
-//        next: Box<BitString>,
-//    },
-//    Nil,esdf
+    next: Option<&'a BitString<'a, C, Bit>>, //    Bit{
+                                             //        bit:Bit,
+                                             //        next: Box<BitString>,
+                                             //    },
+                                             //    Nil,esdf
 }
 
-
-
-
-
-#[derive(Ord,PartialOrd,Eq,PartialEq)]
+#[derive(Ord, PartialOrd, Eq, PartialEq)]
 pub enum Bit {
     Zero = 0,
     One = 1,
@@ -49,16 +44,13 @@ impl Default for Bit {
 }
 
 impl<'a, CONTEXT, HERE: Catori> Path<BitString<'a, CONTEXT, HERE>> for Bit
-    where CONTEXT: Path<Nil<CONTEXT>>
+where
+    CONTEXT: Path<Nil<CONTEXT>>,
 {
     type Context = CONTEXT;
     type There = Nil<CONTEXT>;
 
     fn next(self) -> Self::There {
-
         Self::There::default()
     }
 }
-
-
-

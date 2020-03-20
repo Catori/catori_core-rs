@@ -1,19 +1,21 @@
-#![no_std]
+//#![no_std]
 #![feature(specialization)]
 #![feature(associated_type_defaults)]
 //#![no_std]
 
-mod path;
-mod catori;
-mod universe;
-mod nil;
-mod algebra;
-mod useful_types;
+// mod algebra;
+// mod catori;
+// mod nil;
+// mod path;
+// mod universe;
+// mod useful_types;
+//
+// pub use crate::algebra::*;
+// pub use crate::catori::*;
+// pub use crate::nil::*;
+// pub use crate::path::*;
+// pub use crate::universe::*;
+// pub use crate::useful_types::*;
 
-pub use crate::path::*;
-pub use crate::catori::*;
-pub use crate::universe::*;
-pub use crate::nil::*;
-pub use crate::algebra::*;
-pub use crate::useful_types::*;
-
+mod logic_gates;
+pub use logic_gates::*;

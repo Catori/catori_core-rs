@@ -10,6 +10,8 @@ fixedvec = "0.2.4"
 serde-lexpr = "0.1.1"
 lexpr = "0.2.4"
 log = "0.4.8"
+serde = "1.0.105"
+serde_derive = "1.0.105"
 
 [lib]
 name="catori_core"

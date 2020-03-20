@@ -1,5 +1,5 @@
-use crate::{Catori};
 use crate::nil::Nil;
+use crate::Catori;
 ///A `Path` represets the abstract notion that there is a path from Here to There,
 /// or in other words, given a Here, an implementor of a Path guarantees that if it is traversed
 /// from Here, then eventually a There will be reached
@@ -10,8 +10,6 @@ pub trait Path<HERE>: Catori + Sized + Default {
     fn next(self) -> Self::There;
 }
 
-
-
 //impl
 
 ///Any Category that is also instantiatable by Default, is a path to itself
@@ -20,12 +18,9 @@ impl<Context: Catori + Default> Path<Context> for Context {
     type Context = Context;
     type There = Nil<Context>;
     default fn next(self) -> Self::There {
-
         Self::There::default()
     }
 }
-
-
 
 // impl Path<Peano> for usize {
 //     type Context = usize;
@@ -37,8 +32,8 @@ impl<Context: Catori + Default> Path<Context> for Context {
 
 ///Within a Context, two Categories (Here and There) are equivalent, and hence equal,
 //so long as within Context there is a path from Here to There, as well as from There to Here.
-trait Equivalent<Context, Here, There>
-    : Path<Here, Context = Context, There = There> + Path<There, Context = Context, There = Here>
+trait Equivalent<Context, Here, There>:
+    Path<Here, Context = Context, There = There> + Path<There, Context = Context, There = Here>
 where
     Context: Catori,
     Here: Path<There>,
