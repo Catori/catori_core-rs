@@ -26,7 +26,10 @@ fn main() {
 
     let mut sexprs = vec![];
     // sexprs.push("(true)");
-    sexprs.push("(true true)");
+
+    sexprs.push("(()())");
+    sexprs.push(" (()(()))");
+//    sexprs.push("(true true)");
     sexprs.push("(true (true true) true)");
     sexprs.push("(true (true _) true)");
     sexprs.push("(* true true)");

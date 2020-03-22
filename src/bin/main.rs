@@ -21,12 +21,14 @@ pub trait Catori {
 fn main() -> Result<(), Error> {
     let mut sexprs = vec![];
     // sexprs.push("(true)");
-    sexprs.push("(true true)");
+    sexprs.push(" (()(()))");
+    sexprs.push("(() ())");
     sexprs.push("(true (true true) true)");
     sexprs.push("(true (true _) true)");
     sexprs.push("(* true true)");
     sexprs.push("(* (true true) (true))");
     sexprs.push("(* (true true true) (true true))");
+    sexprs.push("(* (() () ()) (() ()))");
     ///There is no awareness of digits yet. this is just a syntactic example
     sexprs.push("(true true true true (3 1))");
 
