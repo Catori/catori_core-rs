@@ -13,34 +13,33 @@ use std::fmt::{Display, Error, Formatter};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LogicGate {
-    pub A: Receiver,
-    pub B: Receiver,
-    pub Type: GateType,
+    pub a: Receiver,
+    pub b: Receiver,
+    pub gate_type: GateType,
     pub id: GateID,
 }
 
 impl Display for LogicGate {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "{:?}", self);
-        Ok(())
+        write!(f, "{:?}", self)
     }
 }
 
 impl LogicGate {
-    pub fn set_A(mut self, a_gate: LogicGate) -> Self {
-        self.A = Receiver::Gate(Box::new(a_gate));
+    pub fn set_a(mut self, a_gate: LogicGate) -> Self {
+        self.a = Receiver::Gate(Box::new(a_gate));
         self
     }
 
-    pub fn set_B(mut self, b_gate: LogicGate) -> Self {
-        self.B = Receiver::Gate(Box::new(b_gate));
+    pub fn set_b(mut self, b_gate: LogicGate) -> Self {
+        self.b = Receiver::Gate(Box::new(b_gate));
         self
     }
 
     pub fn get_open_input_ids(self, ids: &mut Vec<GateID>) -> Vec<GateID> {
         //  dbg!(&gate);
 
-        match self.A {
+        match self.a {
             // Receiver::Gate(g) => g.get_open_input_ids(ids),
             Receiver::None => {
                 ids.push(self.id.clone());
@@ -51,7 +50,7 @@ impl LogicGate {
             }
         }
 
-        match self.B {
+        match self.b {
             // Receiver::Gate(g) => g.get_open_input_ids(ids),
             Receiver::None => {
                 ids.push(self.id);

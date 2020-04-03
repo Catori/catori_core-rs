@@ -18,9 +18,9 @@ fn main() {
     let mut u = Universe::default();
     let (gate1, gate2) = (u.nand(), u.xor());
     let (gate4, gate5, gate6) = (u.nand(), u.nand(), u.nand());
-    let gate4 = gate4.set_A(gate5.set_B(gate6));
+    let gate4 = gate4.set_a(gate5.set_b(gate6));
     //let gate3 = gate3.set_B(gate4).set_A(gate1);
-    let gate1 = gate1.set_A(gate2).set_B(gate4);
+    let gate1 = gate1.set_a(gate2).set_b(gate4);
 
     //  dbg!("foo: {:?}", gate1);
 
@@ -130,14 +130,14 @@ impl Into<Path> for SExprValue {
 fn pprint_tree(_node: LogicGate) {
     fn pprint_tree(node: &LogicGate, prefix: String) {
         //        let prefix_current = if last { "`- " } else { "|- " };
-        println!("{}{}{:?}", prefix, "|- ", node.A);
-        match &node.A {
+        println!("{}{}{:?}", prefix, "|- ", node.a);
+        match &node.a {
             Receiver::Gate(a) => pprint_tree(a.borrow(), prefix.to_string()),
             Receiver::None => (),
             Receiver::Observer(_o) => unimplemented!(),
         }
-        println!("{}{}{:?}", prefix, "- ", node.B);
-        match &node.B {
+        println!("{}{}{:?}", prefix, "- ", node.b);
+        match &node.b {
             Receiver::Gate(b) => pprint_tree(b.borrow(), prefix.to_string()),
             Receiver::None => (),
             Receiver::Observer(_o) => unimplemented!(),

@@ -1,6 +1,5 @@
 use crate::{GateType, LogicGate, Observer};
 use serde_derive::{Deserialize, Serialize};
-use serde_lexpr::{from_str, to_string};
 use std::sync::Weak;
 
 #[derive(Default)]
@@ -23,12 +22,11 @@ impl Universe {
     fn gate(&mut self, gate_type: GateType) -> LogicGate {
         self.id_counter.0 += 1;
         let gate = LogicGate {
-            A: Receiver::None,
-            B: Receiver::None,
-            Type: gate_type,
+            a: Receiver::None,
+            b: Receiver::None,
+            gate_type,
             id: self.id_counter.clone(),
         };
-        //self.gates.push(gate);
         gate
     }
 }

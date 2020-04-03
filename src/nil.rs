@@ -1,5 +1,4 @@
-use crate::{Catori, Path};
-use core::marker::PhantomData;
+use crate::Catori;
 
 ///Nil is a zero sized type, but unlike (), it has knowledge of its parent type,
 ///and is therefore able to function in a path-dependent way.
