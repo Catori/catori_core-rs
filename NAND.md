@@ -29,7 +29,7 @@ source. This effectively entangles A and B so that the new truth table becomes
 The rows (from above) where A and B varied are no longer occupyable/reachable, and 
 the resulting truth table clearly demonstrates negation from input to output.
 
-## Using SExpressions to construct NAnd Circuitsi
+## Using SExpressions to construct NAnd Circuits
 ### NAnd Tree Construction
 Because the untangled tree form of a NAnd circuit is stpurictly hierarchical,
 they can be represented as simple s-expressions, using only structural elements and no additional symbols
@@ -59,6 +59,7 @@ By using the entanglement operator '?', we can take all the outputs of the
 first argument and use the second argument to entangle individual outputs
 ```
 (? (() ()) ( _1 _2 )
+(? (nand nand) ( _ _ )
 ```
 Says that each of the two input leaves in the ```(() ())``` expression,
 must be bound to the same value during any execution. 

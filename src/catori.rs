@@ -2,19 +2,23 @@
 ///And within all of Catori-space, the only thing
 ///one can reason about is nested ordering and equality
 ///No other attributes of a data type are relevant to Catori.
-pub trait Catori: Ord {
-    fn length(&self) -> usize;
-}
-
-///Any non Catori type that is Ord can be automatically promoted to a Catori type
-impl<CAT> Catori for CAT
-where
-    CAT: Ord,
-{
-    default fn length(&self) -> usize {
+pub trait Catori: Ord + Eq {
+    fn length(&self) -> usize {
         1
     }
 }
+
+impl Catori for bool {}
+
+// ///Any non Catori type that is Ord can be automatically promoted to a Catori type
+// impl<CAT> Catori for CAT
+// where
+//     CAT: Ord + Clone + Eq,
+// {
+//     default fn length(&self) -> usize {
+//         1
+//     }
+// }
 
 pub trait Free: Catori + core::default::Default {}
 ///Blanket implement Catori's Default for any standard type that is Default

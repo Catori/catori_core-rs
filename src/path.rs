@@ -10,17 +10,29 @@ pub trait Path<HERE>: Catori + Sized + Default {
     fn next(self) -> Self::There;
 }
 
-//impl
+impl<T> Path<T> for T
+where
+    T: Catori + Default,
+{
+    type Context = T;
+    type There = Nil;
 
-///Any Category that is also instantiatable by Default, is a path to itself
-///In other words, a default Category implies its own existence
-impl<Context: Catori + Default> Path<Context> for Context {
-    type Context = Context;
-    type There = Nil<Context>;
-    default fn next(self) -> Self::There {
-        Self::There::default()
+    fn next(self) -> Self::There {
+        unimplemented!()
     }
 }
+
+//impl
+
+// ///Any Category that is also instantiatable by Default, is a path to itself
+// ///In other words, a default Category implies its own existence
+// impl<Context: Catori + Default> Path<Context> for Context {
+//     type Context = Context;
+//     type There = Nil<Context>;
+//     default fn next(self) -> Self::There {
+//         Self::There::default()
+//     }
+// }
 
 // impl Path<Peano> for usize {
 //     type Context = usize;
@@ -38,6 +50,7 @@ where
     Context: Catori,
     Here: Path<There>,
     There: Path<There>,
+    Here: Path<Here>,
 {
     fn eq(_: Here, _: There) -> bool {
         true

@@ -12,6 +12,8 @@ use std::borrow::Borrow;
 
 //type NAndGate = GenericLogicGate
 
+//struct Universe
+
 fn main() {
     let mut u = Universe::default();
     let (gate1, gate2) = (u.nand(), u.xor());
@@ -27,16 +29,75 @@ fn main() {
     let mut sexprs = vec![];
     // sexprs.push("(true)");
 
-    sexprs.push("(()())");
-    sexprs.push(" (()(()))");
-//    sexprs.push("(true true)");
-    sexprs.push("(true (true true) true)");
-    sexprs.push("(true (true _) true)");
-    sexprs.push("(* true true)");
-    sexprs.push("(* (true true) (true))");
-    sexprs.push("(* (true true true) (true true))");
-    //There is no awareness of digits yet. this is just a syntactic example
-    sexprs.push("(true true true true (3 1))");
+    // sexprs.push("(()())");
+    // sexprs.push(" (()(()))");
+    //    sexprs.push("(true true)");
+
+    //The following syntax presupposes that there is a primitive NAND type that all other types are built from.
+    //A lisp like let operation can alias multiple connected NAND gates.
+    //A NAND gate has two inputs, and therefore must be called with two arguments. If the arguments are
+    //previously defined structural aliases (using 'let'), then substitution is performed.
+    //If any of the arguments are unknown, then those are implicitly defined variable names that can be used to assign inputs
+    //later on.
+
+    //A [NOT](https://en.wikipedia.org/wiki/NAND_logic#NOT) is a NAND where both inputs are constrained to the same variable
+    sexprs.push("(let NOT (NAND a a)");
+
+    //An [AND](https://en.wikipedia.org/wiki/NAND_logic#AND) is a NOT who's only input is a NAND
+    sexprs.push("(let AND (NAND (NAND a b) (NAND a a) b)");
+    sexprs.push("(let AND (NOT (NAND a b))");
+
+    //An [OR](https://en.wikipedia.org/wiki/NAND_logic#OR) is a NAND who's inputs are two different NOT gates
+    sexprs.push("(let OR (NAND ((NOT a) (NOT a))))");
+    sexprs.push("(let OR (NAND ( NAND A  A ) ( NAND  B B )");
+
+    //An [NOR](https://en.wikipedia.org/wiki/NAND_logic#NOR) is a NOT who's only input is a NAND gate, whose inputs, in turn are
+    //two different NOT gates.
+    sexprs.push("(let NOR (NOT (NAND (NOT a) (NOT b))))");
+    sexprs.push(" (let NOR (NAND ( NAND ( NOT A )  ( NOT B ) ) ( NAND ( NOT A ) ( NOT B ) ) ))");
+    //or "NOT-simplified"
+    sexprs.push(" (let NOR (NOT ( NAND ( NOT A )  ( NOT B ))))");
+
+    //An [XOR](https://en.wikipedia.org/wiki/NAND_logic#XOR)
+    //TODO simplify this?
+    sexprs.push(
+        " 
+    (let XOR (NAND ( NAND A ( NAND A B ) ) 
+                   ( NAND B ( NAND A B ) )
+              )
+     )",
+    );
+
+    sexprs.push(
+        " (let XNOR 
+                    (NAND (NAND ( NOT A ) ( NOT B ) ) 
+                          ( NAND A B ))    
+                 )",
+    );
+
+    sexprs.push(
+        "let MUX 
+        OR   (AND A  
+                  (NOT S ) )
+             ( AND B S )
+        )",
+    );
+
+    sexprs.push(
+        "let DEMUX 
+        OR   (AND A  
+                  (NOT S ) )
+             ( AND B S )
+        )",
+    );
+
+    // sexprs.push("(nand (nand nand) nand)");
+    // sexprs.push("(nand (nand nand nand))");
+    // sexprs.push("(* nand nand)");
+    // sexprs.push("(* (nand nand) (nand))");
+    // sexprs.push("(* (nand nand nand) (nand nand))");
+    // //There is no awareness of digits yet. this is just a syntactic example
+    // sexprs.push("(nand nand nand nand (3 1))");
 
     let path = "(nand xor (xor xor) nand)";
 

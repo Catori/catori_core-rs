@@ -1,0 +1,136 @@
+warning: unused imports: `from_str`, `to_string`
+ --> src/logic_gates/universe.rs:3:19
+  |
+3 | use serde_lexpr::{from_str, to_string};
+  |                   ^^^^^^^^  ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `from_str`, `to_string`
+ --> src/logic_gates/gates.rs:2:19
+  |
+2 | use serde_lexpr::{from_str, to_string};
+  |                   ^^^^^^^^  ^^^^^^^^^
+
+warning: unused imports: `Gate`, `Observer`
+ --> src/logic_gates/gates.rs:4:23
+  |
+4 | use crate::Receiver::{Gate, Observer};
+  |                       ^^^^  ^^^^^^^^
+
+warning: unused imports: `Bool`, `Bytes`, `Char`, `Cons as ConsCell`, `Cons`, `Keyword`, `Nil`, `Null`, `Number as ValNumber`, `Number`, `String as SString`, `Symbol`, `Value as SExprValue`, `Value`, `Vector`, `parse::Error as ParseError`
+ --> src/logic_gates/gates.rs:7:5
+  |
+7 |     parse::Error as ParseError,
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+8 |     Cons as ConsCell, Number, Value as SExprValue, Value,
+  |     ^^^^^^^^^^^^^^^^  ^^^^^^  ^^^^^^^^^^^^^^^^^^^  ^^^^^
+9 |     Value::{Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString, Symbol, Vector},
+  |             ^^^^  ^^^^^  ^^^^  ^^^^  ^^^^^^^  ^^^  ^^^^  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^  ^^^^^^  ^^^^^^
+
+warning: unused import: `std::convert::TryInto`
+  --> src/logic_gates/gates.rs:11:5
+   |
+11 | use std::convert::TryInto;
+   |     ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `from_str`, `to_string`
+ --> src/logic_gates/observer.rs:2:19
+  |
+2 | use serde_lexpr::{from_str, to_string};
+  |                   ^^^^^^^^  ^^^^^^^^^
+
+warning: unused variable: `o`
+  --> src/logic_gates/gates.rs:48:32
+   |
+48 |             Receiver::Observer(o) => {}
+   |                                ^ help: consider prefixing with an underscore: `_o`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `o`
+  --> src/logic_gates/gates.rs:59:32
+   |
+59 |             Receiver::Observer(o) => {}
+   |                                ^ help: consider prefixing with an underscore: `_o`
+
+warning: field is never read: `gates`
+ --> src/logic_gates/universe.rs:8:5
+  |
+8 |     gates: Vec<Weak<LogicGate>>,
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+
+warning: field is never read: `inputs`
+ --> src/logic_gates/universe.rs:9:5
+  |
+9 |     inputs: Vec<Input>,
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: field is never read: `observers`
+  --> src/logic_gates/universe.rs:10:5
+   |
+10 |     observers: Vec<Weak<Observer>>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: structure field `A` should have a snake case name
+  --> src/logic_gates/gates.rs:16:9
+   |
+16 |     pub A: Receiver,
+   |         ^ help: convert the identifier to snake case: `a`
+   |
+   = note: `#[warn(non_snake_case)]` on by default
+
+warning: structure field `B` should have a snake case name
+  --> src/logic_gates/gates.rs:17:9
+   |
+17 |     pub B: Receiver,
+   |         ^ help: convert the identifier to snake case: `b`
+
+warning: structure field `Type` should have a snake case name
+  --> src/logic_gates/gates.rs:18:9
+   |
+18 |     pub Type: GateType,
+   |         ^^^^ help: convert the identifier to snake case: `type`
+
+warning: unused `std::result::Result` that must be used
+  --> src/logic_gates/gates.rs:24:9
+   |
+24 |         write!(f, "{:?}", self);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_must_use)]` on by default
+   = note: this `Result` may be an `Err` variant, which should be handled
+   = note: this warning originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: method `set_A` should have a snake case name
+  --> src/logic_gates/gates.rs:30:12
+   |
+30 |     pub fn set_A(mut self, a_gate: LogicGate) -> Self {
+   |            ^^^^^ help: convert the identifier to snake case: `set_a`
+
+warning: method `set_B` should have a snake case name
+  --> src/logic_gates/gates.rs:35:12
+   |
+35 |     pub fn set_B(mut self, b_gate: LogicGate) -> Self {
+   |            ^^^^^ help: convert the identifier to snake case: `set_b`
+
+warning: unused variable: `inputs`
+  --> src/bin/gate_test.rs:69:9
+   |
+69 |     let inputs = vec![BoolIterator, BoolIterator, BoolIterator];
+   |         ^^^^^^ help: consider prefixing with an underscore: `_inputs`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: enum is never used: `Bool`
+ --> src/bin/gate_test.rs:4:10
+  |
+4 |     enum Bool {
+  |          ^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+
+    Finished dev [unoptimized + debuginfo] target(s) in 0.01s
+     Running `target/debug/gate_test`

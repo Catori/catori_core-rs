@@ -12,7 +12,9 @@ lexpr = "0.2.4"
 log = "0.4.8"
 serde = "1.0.105"
 serde_derive = "1.0.105"
-
+binary-tree = "0.2.0"
+derive_more = "0.99.5"
+petgraph = "0.5.0"
 [lib]
 name="catori_core"
 

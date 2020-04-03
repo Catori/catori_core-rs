@@ -6,38 +6,182 @@ use lexpr::{
     Value::{Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString, Symbol, Vector},
 };
 use log::info;
+use serde::export::PhantomData;
+use std::collections::HashMap;
 use std::convert::TryInto;
-use std::fmt::Formatter;
+use std::fmt::{Debug, Formatter};
 use std::ops::Add;
 
-pub trait Catori {
-    fn car(&self) -> Path;
-    fn cdr(&self) -> Path;
-    fn sum(self, other: Path) -> Path;
-    fn product(self, other: Path) -> Path;
-    fn entangle(self, other: Path) -> Path;
+#[derive(Debug, Clone)]
+pub struct Path<A, B, Q>(SExprValue, PhantomData<A>, PhantomData<B>, PhantomData<Q>);
+
+impl<A, B, Q> Path<A, B, Q> {
+    fn new(sexpression: SExprValue) -> Self {
+        Path(sexpression, PhantomData, PhantomData, PhantomData)
+    }
+}
+
+impl<A, B, Q> Into<Path<A, B, Q>> for SExprValue {
+    fn into(self) -> Path<A, B, Q> {
+        Path(self, PhantomData, PhantomData, PhantomData)
+    }
+}
+
+///A wrapper around an S-expression and a set of symbols that together represent a NAND circuit
+#[derive(Clone, Debug, Default)]
+struct NAndPath {
+    path: Option<SExprValue>,
+    symbols: SymbolTable,
+    truth_table: Option<TruthTable<bool, bool, bool>>,
+}
+
+#[derive(Clone, Debug, Default)]
+struct NAndSymbol {
+    symbol: String,
+    path: NAndPath,
+}
+
+#[derive(Clone, Debug, Default)]
+struct TruthTriple<A, B, Q>(A, B, Q);
+
+type BinaryTruthTriple = TruthTriple<bool, bool, bool>;
+
+#[derive(Clone, Debug, Default)]
+struct TruthTable<A, B, Q>(HashMap<(A, B), Q>);
+
+type BinaryTruthTable = TruthTable<bool, bool, bool>;
+
+#[derive(Clone, Debug, Default)]
+struct SymbolTable(HashMap<String, NAndPath>);
+
+impl NAndPath {
+    ///Returns the equivalent universe with all symbols recursively expanded into their
+    /// let-assigned structural forms. It optionally takes a list of symbols that should not be expanded.
+    /// Recursion stops at these symbols and they are treated as black boxes
+    fn expand(self, simplify_to: Option<SymbolTable>) -> Self {
+        unimplemented!()
+    }
+
+    ///iterates through all pattern universes and looks through self for those patterns. Replaces them with
+    fn compact(self, patterns: Vec<NAndPath>) -> Self {
+        unimplemented!()
+    }
+
+    fn truth_table(self) -> BinaryTruthTable {
+        todo!()
+    }
+
+    // pub fn add_symbol(&mut self, symbol: NAndSymbol) -> &Self {
+    //     self.symbols.0.insert(symbol.symbol, symbol.path.clone());
+    //     for inner_symbol in symbol.path.symbols.0 {
+    //         self.add_symbol(NAndSymbol {
+    //             symbol: inner_symbol.0,
+    //             path: inner_symbol.1,
+    //         });
+    //     }
+    //     self
+    // }
+
+    // pub fn with_symbol(&mut self, other: NAndSymbol) -> &Self {
+    //     self.symbols.0.insert(other.symbol, other.path);
+    //     self
+    // }
+
+    // pub fn with<A,B,Q>(self, other: Path<A,B,Q>) -> Self {
+    //     //other.
+    //     self.symbols.0.insert(other.symbol, other.path);
+    //     self
+    // }
+}
+
+impl TryInto<NAndPath> for String {
+    type Error = ();
+
+    fn try_into(self) -> Result<NAndPath, Self::Error> {
+        Ok(NAndPath {
+            path: todo!(),
+            symbols: todo!(),
+            truth_table: None,
+        })
+    }
 }
 
 fn main() -> Result<(), Error> {
-    let mut sexprs = vec![];
-    // sexprs.push("(true)");
-    sexprs.push(" (()(()))");
-    sexprs.push("(() ())");
-    sexprs.push("(true (true true) true)");
-    sexprs.push("(true (true _) true)");
-    sexprs.push("(* true true)");
-    sexprs.push("(* (true true) (true))");
-    sexprs.push("(* (true true true) (true true))");
-    sexprs.push("(* (() () ()) (() ()))");
-    ///There is no awareness of digits yet. this is just a syntactic example
-    sexprs.push("(true true true true (3 1))");
+    let universe = NAndPath::default();
 
-    let two_truth = Path(lexpr::from_str("((true true))").unwrap());
-    let one_hole = Path(lexpr::from_str("(_)").unwrap());
-    let two_hole = Path(lexpr::from_str("(_ _)").unwrap());
+    //    universe.with("(let NOT (NAND A A))".try_into());
+
+    let mut sexprs = vec![];
+
+    //A [NOT](https://en.wikipedia.org/wiki/NAND_logic#NOT) is a NAND where both inputs are constrained to the same variable
+    sexprs.push("(let NOT (NAND A A))");
+
+    //An [AND](https://en.wikipedia.org/wiki/NAND_logic#AND) is a NOT who's only input is a NAND
+    sexprs.push("(let AND (NAND (NAND A B) (NOT A) B))");
+    sexprs.push("(let AND (NOT (NAND A B)))");
+
+    //An [OR](https://en.wikipedia.org/wiki/NAND_logic#OR) is a NAND who's inputs are two different NOT gates
+    sexprs.push("(let OR (NAND ((NOT A) (NOT A))))");
+    sexprs.push("(let OR2 (NAND ( NAND A  A ) ( NAND  B B )))");
+
+    //An [NOR](https://en.wikipedia.org/wiki/NAND_logic#NOR) is a NOT who's only input is a NAND gate, whose inputs, in turn are
+    //two different NOT gates.
+    sexprs.push("(let NOR (NOT (NAND (NOT A) (NOT B))))");
+    sexprs.push(" (let NOR (NAND ( NAND ( NOT A )  ( NOT B ) ) ( NAND ( NOT A ) ( NOT B ) ) ))");
+    //or "NOT-simplified"
+    sexprs.push(" (let NOR (NOT ( NAND ( NOT A )  ( NOT B ))))");
+
+    //An [XOR](https://en.wikipedia.org/wiki/NAND_logic#XOR)
+    //TODO simplify this?
+    sexprs.push(
+        "
+    (let XOR (NAND ( NAND A ( NAND A B ) )
+                   ( NAND B ( NAND A B ) )
+              )
+     )",
+    );
+
+    sexprs.push(
+        " (let XNOR
+                    (NAND (NAND ( NOT A ) ( NOT B ) )
+                          ( NAND A B ))
+                 )",
+    );
+
+    sexprs.push(
+        "(let MUX
+                    (OR   (AND A
+                  (NOT S ) )
+             ( AND B S )
+        ))",
+    );
+
+    // sexprs.push(
+    //     "let DEMUX
+    //     OR   (AND A
+    //               (NOT S ) )
+    //          ( AND B S )
+    //     )",
+    // );
+
+    // sexprs.push("(true)");
+    // sexprs.push(" (()(()))");
+    // sexprs.push("(() ())");
+    // sexprs.push("(true (true true) true)");
+    // sexprs.push("(true (true _) true)");
+    // sexprs.push("(* true true)");
+    // sexprs.push("(* (true true) (true))");
+    // sexprs.push("(* (true true true) (true true))");
+    // sexprs.push("(* (() () ()) (() ()))");
+    // ///There is no awareness of digits yet. this is just a syntactic example
+    // sexprs.push("(true true true true (3 1))");
+
+    let two_truth = Path::<bool, bool, bool>::new(lexpr::from_str("((true true))").unwrap());
+    let one_hole = Path::<bool, bool, bool>::new(lexpr::from_str("(_)").unwrap());
+    let two_hole = Path::<bool, bool, bool>::new(lexpr::from_str("(_ _)").unwrap());
 
     for path in sexprs.clone() {
-        let path = Path(lexpr::from_str(path).unwrap());
+        let path = Path::<bool, bool, bool>::new(lexpr::from_str(path).unwrap());
         println!("original form:              {}", path);
         println!("lexpr debug form:           {}", path.expand());
         println!("lexpr simple form:          {}", path.to_string());
@@ -53,7 +197,7 @@ fn main() -> Result<(), Error> {
     }
 
     for path in sexprs {
-        let path = Path(lexpr::from_str(path.clone()).unwrap());
+        let path = Path::<bool, bool, bool>::new(lexpr::from_str(path.clone()).unwrap());
 
         print!("entangle:↑ {} {} => ", one_hole, path);
         println!("             {}", one_hole.clone().entangle(path.clone()));
@@ -64,32 +208,23 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn print_forms(path: Path) -> Result<(), Error> {
-    // println!("default observation:        {}\n", &lexpr.observe("()".to_string()));
-    //  println!("split at two:        {}\n", &lexpr.observe(Some(sub_two_lens))?);
-    println!();
-    Ok(())
-}
+// fn print_forms(path: Path<A,B,Q>) -> Result<(), Error> {
+//     // println!("default observation:        {}\n", &lexpr.observe("()".to_string()));
+//     //  println!("split at two:        {}\n", &lexpr.observe(Some(sub_two_lens))?);
+//     println!();
+//     Ok(())
+// }
 
-#[derive(Debug, Clone)]
-pub struct Path(SExprValue);
-
-impl Into<Path> for SExprValue {
-    fn into(self) -> Path {
-        Path(self)
-    }
-}
-
-impl Catori for Path {
+impl<A: Debug, B: Debug, Q: Debug> Catori<A, B, Q> for Path<A, B, Q> {
     fn car(&self) -> Self {
-        Path(match self.0.clone() {
+        Path::new(match self.0.clone() {
             Cons(cons) => cons.car().clone(),
             other => other,
         })
     }
 
-    fn cdr(&self) -> Path {
-        Path(match self.0.clone() {
+    fn cdr(&self) -> Path<A, B, Q> {
+        Path::new(match self.0.clone() {
             Cons(cons) => cons.cdr().clone(),
             _ => SExprValue::Null,
         })
@@ -107,8 +242,8 @@ impl Catori for Path {
     /// Summation neither creates nor destroys information
     /// This operation can be visualized as taking two paths that are already pointed in the same direction
     /// and abutting them end to end
-    fn sum(self, other: Path) -> Path {
-        Path(Cons(ConsCell::new::<Value, ConsCell>(
+    fn sum(self, other: Path<A, B, Q>) -> Path<A, B, Q> {
+        Path::new(Cons(ConsCell::new::<Value, ConsCell>(
             Value::symbol("+"),
             ConsCell::new(self.0, other.0.clone()),
         )))
@@ -120,8 +255,8 @@ impl Catori for Path {
     ///This can be visualized as taking 2 paths that exist perpendicular to each other, and creating a 2 dimensional
     /// field/space/array out of them
     /// Like summation, this is a lazy operation
-    fn product(self, other: Path) -> Path {
-        Path(Cons(ConsCell::new::<Value, ConsCell>(
+    fn product(self, other: Path<A, B, Q>) -> Path<A, B, Q> {
+        Path::new(Cons(ConsCell::new::<Value, ConsCell>(
             Value::symbol("*"),
             ConsCell::new(self.0, other.0.clone()),
         )))
@@ -160,51 +295,51 @@ impl Catori for Path {
     }
 }
 
-trait Entangle {
-    fn or(self, rhs: Self) -> Path;
+trait Entangle<A: Debug, B: Debug, Q: Debug> {
+    fn or(self, rhs: Self) -> Path<A, B, Q>;
 
     fn is_hole(&self) -> bool {
         false
     }
 }
 
-impl Entangle for bool {
-    fn or(self, rhs: Self) -> Path {
+impl<A: Debug, B: Debug, Q: Debug> Entangle<A, B, Q> for bool {
+    fn or(self, rhs: Self) -> Path<A, B, Q> {
         match (self, rhs) {
-            (false, false) => Path(SExprValue::Bool(false)),
-            (false, true) => Path(SExprValue::Bool(true)),
-            (true, false) => Path(SExprValue::Bool(true)),
-            (true, true) => Path(SExprValue::Bool(true)),
+            (false, false) => Path::new(SExprValue::Bool(false)),
+            (false, true) => Path::new(SExprValue::Bool(true)),
+            (true, false) => Path::new(SExprValue::Bool(true)),
+            (true, true) => Path::new(SExprValue::Bool(true)),
         }
     }
 }
 
-impl Entangle for Number {
-    fn or(self, rhs: Self) -> Path {
+impl<A: Debug, B: Debug, Q: Debug> Entangle<A, B, Q> for Number {
+    fn or(self, rhs: Self) -> Path<A, B, Q> {
         match (self, rhs) {
-            (lhs, rhs) => Path(SExprValue::Cons(ConsCell::new(lhs, rhs))),
+            (lhs, rhs) => Path::new(SExprValue::Cons(ConsCell::new(lhs, rhs))),
         }
     }
 }
 
-impl Entangle for char {
-    fn or(self, rhs: Self) -> Path {
+impl<A: Debug, B: Debug, Q: Debug> Entangle<A, B, Q> for char {
+    fn or(self, rhs: Self) -> Path<A, B, Q> {
         match (self, rhs) {
-            (lhs, rhs) => Path(SExprValue::Cons(ConsCell::new(lhs, rhs))),
+            (lhs, rhs) => Path::new(SExprValue::Cons(ConsCell::new(lhs, rhs))),
         }
     }
 }
 
-impl Entangle for String {
-    fn or(self, rhs: Self) -> Path {
+impl<A: Debug, B: Debug, Q: Debug> Entangle<A, B, Q> for String {
+    fn or(self, rhs: Self) -> Path<A, B, Q> {
         match (self, rhs) {
-            (lhs, rhs) => Path(SExprValue::Cons(ConsCell::new(lhs, rhs))),
+            (lhs, rhs) => Path::new(SExprValue::Cons(ConsCell::new(lhs, rhs))),
         }
     }
 }
 
-impl Entangle for Value {
-    fn or(self, rhs: Self) -> Path {
+impl<A: Debug, B: Debug, Q: Debug> Entangle<A, B, Q> for Value {
+    fn or(self, rhs: Self) -> Path<A, B, Q> {
         match (self, rhs) {
             (Symbol(sym), _) => todo!(),
             (_, Symbol(sym)) => todo!(),
@@ -220,7 +355,7 @@ impl Entangle for Value {
             (Vector(lhs), Vector(rhs)) => todo!(),
             (Nil, Null) | (Null, Nil) => todo!(),
             (Nil, val) | (Null, val) | (val, Nil) | (val, Null) => val.into(),
-            (lhs, rhs) => Path(SExprValue::Cons(ConsCell::new(lhs, rhs))),
+            (lhs, rhs) => Path::new(SExprValue::Cons(ConsCell::new(lhs, rhs))),
         }
     }
 
@@ -235,18 +370,18 @@ impl Entangle for Value {
     }
 }
 
-impl Entangle for Path {
-    fn or(self, rhs: Self) -> Path {
+impl<A: Debug, B: Debug, Q: Debug> Entangle<A, B, Q> for Path<A, B, Q> {
+    fn or(self, rhs: Self) -> Path<A, B, Q> {
         self.0.or(rhs.0)
         // self.cdr().or(rhs.cdr())
     }
 
-    fn is_hole(&self) -> bool {
-        self.0.is_hole()
-    }
+    // fn is_hole(&self) -> bool {
+    //     self.0.is_hole()
+    // }
 }
 
-impl Path {
+impl<A: Debug, B: Debug, Q: Debug> Path<A, B, Q> {
     ///observing a path through another path (using it as a lens) causes the observed path
     ///to collapse into the shape (lens) that the observer is expecting.
     /// In practice this can be achieve by iterating in parallel through the two paths, and
@@ -286,8 +421,8 @@ impl Path {
             ValNumber(num) => format!("{}", &num.to_string()),
             Cons(cons) => format!(
                 "( {} {} )",
-                Path(cons.car().clone()).explicit(),
-                Path(cons.cdr().clone()).explicit()
+                Path::<bool, bool, bool>::new(cons.car().clone()).explicit(),
+                Path::<bool, bool, bool>::new(cons.cdr().clone()).explicit()
             ),
             SString(string) => format!("{}", string.to_string()),
             _ => unimplemented!(),
@@ -297,7 +432,7 @@ impl Path {
     ///Condensing is just a convenient human readable form that should be identical
     /// to the simple form generated by sexpr library
     fn condense(&self) -> String {
-        fn _condense(value: &Path, in_cons: bool) -> String {
+        fn _condense<A, B, Q>(value: &Path<A, B, Q>, in_cons: bool) -> String {
             match &value.0 {
                 Null => "".to_string(),
                 Cons(cons) => format!(
@@ -309,8 +444,8 @@ impl Path {
                             ""
                         }
                     },
-                    _condense(&Path(cons.car().clone()), false),
-                    _condense(&Path(cons.cdr().clone()), true),
+                    _condense(&Path::<bool, bool, bool>::new(cons.car().clone()), false),
+                    _condense(&Path::<bool, bool, bool>::new(cons.cdr().clone()), true),
                     if !in_cons { ") " } else { "" }
                 ),
                 ValNumber(num) => format!("{} ", &num.to_string()),
@@ -325,12 +460,26 @@ impl Path {
 
     ///Iterates through a nested path and flattens all structures
     fn flatten(&self) -> String {
-        fn _flatten(value: &Path, in_cons: bool) -> String {
+        fn _flatten<A, B, Q>(value: &Path<A, B, Q>, in_cons: bool) -> String {
             match &value.0 {
                 Null => "".to_string(),
                 ValNumber(num) => num.to_string(),
                 Symbol(sym) => match sym.clone().into_string().as_str() {
-                    "true" => "true".to_string(),
+                    "let" => "NAND".to_string(),
+                    "NAND" => "NAND".to_string(),
+                    "A" | "B" | "S" => sym.to_string(),
+                    "NOT" => "NOT".to_string(),
+                    "AND" => "AND".to_string(),
+                    "OR" => "OR".to_string(),
+                    "OR2" => "OR".to_string(),
+                    "OR2" => "OR".to_string(),
+                    "NOR" => "NOR".to_string(),
+                    "XOR" => "XOR".to_string(),
+                    "XNOR" => "XNOR".to_string(),
+                    "MUX" => "MUX".to_string(),
+                    "A" => "A".to_string(),
+                    "B" => "B".to_string(),
+                    "S" => "S".to_string(),
                     "*" => "*".to_string(),
                     "_" => "_".to_string(),
                     str => panic!("invalid symbol {}", sym),
@@ -344,8 +493,8 @@ impl Path {
                             ""
                         }
                     },
-                    _flatten(&Path(cons.car().clone()), true),
-                    _flatten(&Path(cons.cdr().clone()), true),
+                    _flatten(&Path::<bool, bool, bool>::new(cons.car().clone()), true),
+                    _flatten(&Path::<bool, bool, bool>::new(cons.cdr().clone()), true),
                     {
                         if !in_cons {
                             " )"
@@ -365,7 +514,10 @@ impl Path {
     fn size(&self) -> u64 {
         match &self.0 {
             Nil | Null => 0,
-            Cons(sexpr) => Path(sexpr.car().clone()).size() + Path(sexpr.cdr().clone()).size(),
+            Cons(sexpr) => {
+                Path::<bool, bool, bool>::new(sexpr.car().clone()).size()
+                    + Path::<bool, bool, bool>::new(sexpr.cdr().clone()).size()
+            }
             _ => 1,
         }
     }
@@ -375,17 +527,25 @@ impl Path {
     fn length(&self) -> u64 {
         match &self.0 {
             Nil | Null => 0,
-            Cons(sexpr) => 1 + Path(sexpr.cdr().clone()).length(),
+            Cons(sexpr) => 1 + Path::<bool, bool, bool>::new(sexpr.cdr().clone()).length(),
             _ => 1,
         }
     }
 }
 
-impl Display for Path {
+impl<A, B, Q> Display for Path<A, B, Q> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "{}", self.0);
         Ok(())
     }
+}
+
+pub trait Catori<A, B, Q> {
+    fn car(&self) -> Path<A, B, Q>;
+    fn cdr(&self) -> Path<A, B, Q>;
+    fn sum(self, other: Path<A, B, Q>) -> Path<A, B, Q>;
+    fn product(self, other: Path<A, B, Q>) -> Path<A, B, Q>;
+    fn entangle(self, other: Path<A, B, Q>) -> Path<A, B, Q>;
 }
 
 #[derive(Debug)]
