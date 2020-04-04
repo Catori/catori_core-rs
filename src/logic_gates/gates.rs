@@ -6,7 +6,10 @@ use crate::{GateID, Receiver};
 use lexpr::{
     parse::Error as ParseError,
     Cons as ConsCell, Number, Value as SExprValue, Value,
-    Value::{Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString, Symbol, Vector},
+    Value::{
+        Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString,
+        Symbol, Vector,
+    },
 };
 use std::convert::TryInto;
 use std::fmt::{Display, Error, Formatter};

@@ -3,7 +3,10 @@ use lexpr::parse::NilSymbol;
 use lexpr::{
     parse::Error as ParseError,
     Cons as ConsCell, Number, Value as SExprValue, Value,
-    Value::{Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString, Symbol, Vector},
+    Value::{
+        Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString,
+        Symbol, Vector,
+    },
 };
 use log::info;
 use serde::export::PhantomData;
@@ -189,7 +192,10 @@ fn main() -> Result<(), Error> {
         println!("catori condensed:           {}", path.clone().condense());
         println!("catori flattened:           {}", path.clone().flatten());
         println!("catori length:              {}", path.clone().length());
-        println!("addition:                   {}", path.clone().sum(two_truth.clone()));
+        println!(
+            "addition:                   {}",
+            path.clone().sum(two_truth.clone())
+        );
         println!(
             "multiplication:             {}\n",
             path.clone().product(two_truth.clone())

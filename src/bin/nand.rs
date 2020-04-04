@@ -4,7 +4,10 @@ use catori_core::{LogicGate, Receiver, Universe};
 use lexpr::{
     parse::Error as ParseError,
     Cons as ConsCell, Number, Value as SExprValue, Value,
-    Value::{Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString, Symbol, Vector},
+    Value::{
+        Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString,
+        Symbol, Vector,
+    },
 };
 use std::borrow::Borrow;
 

@@ -5,6 +5,26 @@ use serde::export::fmt::Error;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 
+fn main() {
+    let u = Universe::default();
+
+    let gates = vec![
+        ("NAND", u.nand()),
+        ("NOT", u.not()),
+        ("AND", u.and()),
+        ("XOR", u.xor()),
+        ("XNOR", u.xnor()),
+        ("Adder", u.full_adder()),
+    ];
+
+    for (key, val) in gates {
+        println!("\n{}", key);
+        println!("inputs -> {} \n", descendants(&val));
+        //println!("inputs -> {} \n", descendants(&val).replace("NAND ", ""));
+        println!("output <- {}", ancestors(&val));
+    }
+}
+
 #[derive(Default)]
 struct Universe {}
 
@@ -17,7 +37,7 @@ impl Universe {
         dag
     }
 
-    fn nand_circuit(&self) -> Graph<Node, ()> {
+    fn nand(&self) -> Graph<Node, ()> {
         let mut dag = Graph::<Node, ()>::new();
         let switcha = dag.add_node(Node::Input(Input("A".to_string())));
         let switchb = dag.add_node(Node::Input(Input("B".to_string())));
@@ -56,7 +76,14 @@ impl Universe {
         let c = dag.add_node(self.NAND_gate());
         let d = dag.add_node(self.NAND_gate());
         let e = dag.add_node(self.NAND_gate());
-        dag.extend_with_edges(&[(switcha, c), (switcha, c), (switchb, d), (switchb, d), (c, e), (d, e)]);
+        dag.extend_with_edges(&[
+            (switcha, c),
+            (switcha, c),
+            (switchb, d),
+            (switchb, d),
+            (c, e),
+            (d, e),
+        ]);
         dag
     }
 
@@ -175,57 +202,23 @@ impl Display for GateType {
     }
 }
 
-fn main() {
-    print!("\n\nNAND");
-    let u = Universe::default();
-    print_input_descendants(&u.nand_circuit());
-    print_output_ancestors(&u.nand_circuit());
-    println!();
-
-    print!("\n\nNOT");
-    print_input_descendants(&u.not());
-    print_output_ancestors(&u.not());
-    println!();
-
-    print!("\n\nAND");
-    print_input_descendants(&u.and());
-    print_output_ancestors(&u.and());
-    println!();
-
-    print!("\n\nOR");
-    print_input_descendants(&u.or());
-    print_output_ancestors(&u.or());
-    println!();
-
-    print!("\n\nXOR");
-    print_input_descendants(&u.xor());
-    print_output_ancestors(&u.xor());
-    println!();
-
-    print!("\n\nXNOR");
-    print_input_descendants(&u.xnor());
-    print_output_ancestors(&u.xnor());
-    println!();
-
-    print!("\n\nAdder");
-    print_input_descendants(&u.full_adder());
-    print_output_ancestors(&u.full_adder());
-    println!();
-}
-
-fn print_output_ancestors(circuit: &Graph<Node, (), Directed, u32>) {
+fn ancestors(circuit: &Graph<Node, (), Directed, u32>) -> String {
+    let mut output = String::new();
     for node in circuit.externals(Direction::Outgoing) {
-        print!("\noutput {} <- ", index2symbol(&node));
-        ascend(&circuit, node, 0);
+        &output.push_str("(NAND ");
+        ascend(&circuit, node, &mut output, 0);
+        &output.push_str(" )");
     }
+    output
 }
 
-fn print_input_descendants(circuit: &Graph<Node, (), Directed, u32>) {
+fn descendants(circuit: &Graph<Node, (), Directed, u32>) -> String {
+    let mut input = String::new();
     for node in circuit.externals(Direction::Incoming) {
-        print!("\ninput {} -> ", index2symbol(&node));
-
-        descend(&circuit, node, 0);
+        input.push_str(&format!("\n{} ", index2symbol(&node)));
+        descend(&circuit, node, &mut input, 0);
     }
+    input
 }
 
 #[derive(Debug)]
@@ -296,23 +289,24 @@ impl Into<Label> for &str {
     }
 }
 
-fn ascend(dag: &Graph<Node, ()>, node: NodeIndex, depth: usize) {
+fn ascend(dag: &Graph<Node, ()>, node: NodeIndex, output: &mut String, depth: usize) -> String {
     for node in dag.neighbors_directed(node, Direction::Incoming) {
-        print!("( ");
-        print!("{} ", dag.node_weight(node).unwrap());
+        output.push_str("( ");
+        output.push_str(&format!("{} ", &dag.node_weight(node).unwrap()));
         // print!("{} ", index2symbol(&node));
-        ascend(dag, node, depth + 1);
-        print!(")");
+        ascend(dag, node, output, depth + 1);
+        output.push_str(")");
     }
+    output.clone()
 }
 
-fn descend(dag: &Graph<Node, ()>, node: NodeIndex, depth: usize) {
+fn descend(dag: &Graph<Node, ()>, node: NodeIndex, input: &mut String, depth: usize) {
     for node in dag.neighbors_directed(node, Direction::Outgoing) {
-        print!("( ");
+        input.push_str("( ");
 
-        print!("{} ", dag.node_weight(node).unwrap());
-        descend(dag, node, depth + 1);
-        print!(")");
+        input.push_str(&format!("{} ", dag.node_weight(node).unwrap()));
+        descend(dag, node, input, depth + 1);
+        input.push_str(")");
     }
 }
 

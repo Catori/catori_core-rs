@@ -1,6 +1,6 @@
 # Catori Foundations: [NAnd Logic](https://en.wikipedia.org/wiki/NAND_logic)
 
-##Introduction
+## Introduction
 
 A NAnd gate consists of two inputs, one output, and obeys the following truth table.
 
@@ -18,7 +18,7 @@ binary tree, with the output at the top, and the inputs as the leaves.
 In order to build functional circuits out of just NAnd gates, however,
 it is necessary to be able to bind two inputs to the same output. 
 
-e.g. to create a NOT gate, inputs A and B have to be bound to the same 
+e.g. to create a NOT gate from a NAnd gate, inputs A and B have to be bound to the same 
 source. This effectively entangles A and B so that the new truth table becomes
 
 | A 	| B 	| Q 	|
@@ -31,7 +31,7 @@ the resulting truth table clearly demonstrates negation from input to output.
 
 ## Using SExpressions to construct NAnd Circuits
 ### NAnd Tree Construction
-Because the untangled tree form of a NAnd circuit is stpurictly hierarchical,
+Because the untangled tree form of a NAnd circuit is stictly hierarchical,
 they can be represented as simple s-expressions, using only structural elements and no additional symbols
 e.g.
 ```
@@ -42,6 +42,11 @@ outer NAnd's A-input. and
 ```
 (()(()))
 ```
+
+Alernative explicit notation might be:
+```
+((nand)(nand(nand)))
+``` 
 represents separate trees, the first containing one NAnd gate,
 and the second containing two gates with a Q-A relationship.
 Collectively, the two trees have 4 3 unoccupied inputs and two unoccupied outputs

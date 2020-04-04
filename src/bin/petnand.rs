@@ -134,7 +134,14 @@ fn or() -> Graph<Node, ()> {
     let a = dag.add_node(nand());
     let b = dag.add_node(nand());
     let c = dag.add_node(nand());
-    dag.extend_with_edges(&[(switch1, a), (switch1, a), (switch2, b), (switch2, b), (a, c), (b, c)]);
+    dag.extend_with_edges(&[
+        (switch1, a),
+        (switch1, a),
+        (switch2, b),
+        (switch2, b),
+        (a, c),
+        (b, c),
+    ]);
     dag
 }
 

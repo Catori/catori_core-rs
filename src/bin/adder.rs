@@ -58,7 +58,9 @@ impl Universe {
             g: GateType::NAnd,
             a: Default::default(),
             b: Default::default(),
-            q: Rc::downgrade(&Rc::new(Output::Observable(Symbol::Observable("".to_string())))),
+            q: Rc::downgrade(&Rc::new(Output::Observable(Symbol::Observable(
+                "".to_string(),
+            )))),
         };
         let gate = Rc::new(gate);
         let weak_gate = Rc::downgrade(&gate);
