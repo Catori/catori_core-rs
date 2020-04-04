@@ -1,4 +1,13 @@
 use lexpr::to_string;
+use lexpr::parse::NilSymbol;
+use lexpr::{
+    parse::Error as ParseError,
+    Cons as ConsCell, Number, Value as SExprValue, Value,
+    Value::{
+        Bool, Bytes, Char, Cons, Keyword, Nil, Null, Number as ValNumber, String as SString,
+        Symbol, Vector,
+    },
+};
 use petgraph::prelude::NodeIndex;
 use petgraph::{Directed, Direction, Graph};
 use serde::export::fmt::Error;
@@ -22,11 +31,15 @@ fn main() {
         println!("inputs -> {} \n", descendants(&val));
         //println!("inputs -> {} \n", descendants(&val).replace("NAND ", ""));
         println!("output <- {}", ancestors(&val));
+        //let lexpr = lexpr::from_str(&ancestors(&val)).unwrap();
+
     }
 }
 
 #[derive(Default)]
 struct Universe {}
+
+
 
 impl Universe {
     fn not(&self) -> Graph<Node, ()> {
@@ -186,21 +199,40 @@ impl Universe {
     }
 }
 
+
+#[derive(Debug)]
+struct Label(String);
+
+
 #[derive(Debug)]
 pub enum GateType {
     NAnd,
     XOr,
 }
 
-impl Display for GateType {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let name = match self {
-            GateType::NAnd => "NAND",
-            GateType::XOr => "XOR",
-        };
-        write!(f, "{}", name)
-    }
+#[derive(Debug)]
+enum Node {
+    Input(Input),
+    Output(Output),
+    Gate(Gate),
 }
+
+#[derive(Debug)]
+struct Input(String);
+
+#[derive(Debug)]
+struct Output(String);
+
+
+#[derive(Debug)]
+struct Gate {
+    gate_type: GateType,
+    value: Option<bool>,
+}
+
+
+
+//Graph recursion and string generation
 
 fn ancestors(circuit: &Graph<Node, (), Directed, u32>) -> String {
     let mut output = String::new();
@@ -219,74 +251,6 @@ fn descendants(circuit: &Graph<Node, (), Directed, u32>) -> String {
         descend(&circuit, node, &mut input, 0);
     }
     input
-}
-
-#[derive(Debug)]
-enum Node {
-    Input(Input),
-    Output(Output),
-    Gate(Gate),
-}
-
-#[derive(Debug)]
-struct Input(String);
-
-impl Display for Input {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-#[derive(Debug)]
-struct Output(String);
-
-impl Display for Output {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-#[derive(Debug)]
-struct Gate {
-    gate_type: GateType,
-    value: Option<bool>,
-}
-
-impl Display for Node {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Node::Input(input) => write!(f, "{}", input),
-            Node::Output(output) => write!(f, "{}", output),
-            Node::Gate(g) => write!(f, "{}", g),
-        }
-    }
-}
-
-impl Display for Gate {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.gate_type)
-    }
-}
-
-#[derive(Debug)]
-struct Label(String);
-
-impl Display for Label {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl Default for Node {
-    fn default() -> Self {
-        Node::Input(Input("".to_string()))
-    }
-}
-
-impl Into<Label> for &str {
-    fn into(self) -> Label {
-        Label(self.to_string())
-    }
 }
 
 fn ascend(dag: &Graph<Node, ()>, node: NodeIndex, output: &mut String, depth: usize) -> String {
@@ -310,6 +274,67 @@ fn descend(dag: &Graph<Node, ()>, node: NodeIndex, input: &mut String, depth: us
     }
 }
 
+
+
+//Formatting and simple conversion
+
+impl Display for Input {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Display for Output {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+
 fn index2symbol(idx: &NodeIndex) -> char {
     (idx.index() as u8 + 65).into()
+}
+
+impl Display for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Node::Input(input) => write!(f, "{}", input),
+            Node::Output(output) => write!(f, "{}", output),
+            Node::Gate(g) => write!(f, "{}", g),
+        }
+    }
+}
+
+impl Display for Gate {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.gate_type)
+    }
+}
+
+impl Default for Node {
+    fn default() -> Self {
+        Node::Input(Input("".to_string()))
+    }
+}
+
+impl Into<Label> for &str {
+    fn into(self) -> Label {
+        Label(self.to_string())
+    }
+}
+
+impl Display for GateType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let name = match self {
+            GateType::NAnd => "NAND",
+            GateType::XOr => "XOR",
+        };
+        write!(f, "{}", name)
+    }
+}
+
+impl Display for Label {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
 }
