@@ -20,20 +20,22 @@ fn main() {
     let gates = vec![
         ("NAND", u.nand()),
         ("NOT", u.not()),
+     //   ("simpl-NOT", u.simple_not()),
         ("AND", u.and()),
         ("OR", u.or()),
         ("NOR", u.nor()),
         ("XOR", u.xor()),
         ("XNOR", u.xnor()),
+     //   ("MUX", u.mux()),
         ("Adder", u.full_nand_adder()),
-        ("SimplifiedAdder", u.full_adder()),
+     //   ("SimplifiedAdder", u.full_adder()),
     ];
 
     for (key, val) in gates {
         println!("\n{}", key);
         println!("inputs -> {} \n", descendants(&val));
         //println!("inputs -> {} \n", descendants(&val).replace("NAND ", ""));
-        println!("output <- \n{}", ancestors(&val));
+        println!("output <- {}", ancestors(&val,&key));
         //let lexpr = lexpr::from_str(&ancestors(&val)).unwrap();
 
     }
@@ -60,6 +62,14 @@ impl Universe {
         dag
     }
 
+    // fn simple_not(&self) -> Graph<Node, ()> {
+    //     let mut dag = Graph::<Node, ()>::new();
+    //     let switcha = dag.add_node(Node::Input(Input("A".to_string())));
+    //     let b = dag.add_node(self.NOT_gate());
+    //     dag.extend_with_edges(&[(switcha, b)]);
+    //     dag
+    // }
+
     fn xor(&self) -> Graph<Node, ()> {
         let mut dag = Graph::<Node, ()>::new();
         let switcha = dag.add_node(Node::Input(Input("A".to_string())));
@@ -81,6 +91,28 @@ impl Universe {
         ]);
         dag
     }
+
+    // fn mux(&self) -> Graph<Node, ()> {
+    //     let mut dag = Graph::<Node, ()>::new();
+    //     let in1 = dag.add_node(Node::Input(Input("IN1".to_string())));
+    //     let in2 = dag.add_node(Node::Input(Input("IN2".to_string())));
+    //     let sel = dag.add_node(Node::Input(Input("SEL".to_string())));
+    //     let d = dag.add_node(self.not());
+    //     let e = dag.add_node(self.and());
+    //     let f = dag.add_node(self.and());
+    //     let g = dag.add_node(self.and());
+    //
+    //     dag.extend_with_edges(&[
+    //         (sel, d),
+    //         (sel, f),
+    //         (in1, e),
+    //         (in2, f),
+    //         (d, e),
+    //         (e, g),
+    //         (f, g),
+    //     ]);
+    //     dag
+    // }
 
     fn or(&self) -> Graph<Node, ()> {
         let mut dag = Graph::<Node, ()>::new();
@@ -166,52 +198,59 @@ impl Universe {
         })
     }
 
-    fn XOR_gate(&self) -> Node {
-        Node::Gate(Gate {
-            gate_type: GateType::XOr,
-            value: None,
-        })
-    }
+    // fn XOR_gate(&self) -> Node {
+    //     Node::Gate(Gate {
+    //         gate_type: GateType::XOr,
+    //         value: None,
+    //     })
+    // }
+    //
+    // fn OR_gate(&self) -> Node {
+    //     Node::Gate(Gate {
+    //         gate_type: GateType::Or,
+    //         value: None,
+    //     })
+    // }
+    //
+    // fn AND_gate(&self) -> Node {
+    //     Node::Gate(Gate {
+    //         gate_type: GateType::And,
+    //         value: None,
+    //     })
+    // }
+    //
+    // fn NOT_gate(&self) -> Node {
+    //     Node::Gate(Gate {
+    //         gate_type: GateType::Not,
+    //         value: None,
+    //     })
+    // }
 
-    fn OR_gate(&self) -> Node {
-        Node::Gate(Gate {
-            gate_type: GateType::Or,
-            value: None,
-        })
-    }
 
-    fn AND_gate(&self) -> Node {
-        Node::Gate(Gate {
-            gate_type: GateType::And,
-            value: None,
-        })
-    }
-
-
-    fn full_adder(&self) -> Graph<Node, ()> {
-        let mut dag = Graph::<Node, ()>::new();
-        let switcha = dag.add_node((Node::Input(Input("A".to_string()))));
-        let switchb = dag.add_node((Node::Input(Input("B".to_string()))));
-        let switchc = dag.add_node((Node::Input(Input("C".to_string()))));
-        let d = dag.add_node(self.XOR_gate());
-        let e = dag.add_node(self.AND_gate());
-        let f = dag.add_node(self.XOR_gate());
-        let g = dag.add_node(self.AND_gate());
-        let h = dag.add_node(self.OR_gate());
-        dag.extend_with_edges(&[
-            (switchc, f),
-            (switchc, g),
-            (switchb, d),
-            (switchb, e),
-            (switcha, d),
-            (switcha, e),
-            (d, g),
-            (d, f),
-            (e, h),
-            (g, h),
-        ]);
-        dag
-    }
+    // fn full_adder(&self) -> Graph<Node, ()> {
+    //     let mut dag = Graph::<Node, ()>::new();
+    //     let switcha = dag.add_node((Node::Input(Input("A".to_string()))));
+    //     let switchb = dag.add_node((Node::Input(Input("B".to_string()))));
+    //     let switchc = dag.add_node((Node::Input(Input("C".to_string()))));
+    //     let d = dag.add_node(self.XOR_gate());
+    //     let e = dag.add_node(self.AND_gate());
+    //     let f = dag.add_node(self.XOR_gate());
+    //     let g = dag.add_node(self.AND_gate());
+    //     let h = dag.add_node(self.OR_gate());
+    //     dag.extend_with_edges(&[
+    //         (switchc, f),
+    //         (switchc, g),
+    //         (switchb, d),
+    //         (switchb, e),
+    //         (switcha, d),
+    //         (switcha, e),
+    //         (d, g),
+    //         (d, f),
+    //         (e, h),
+    //         (g, h),
+    //     ]);
+    //     dag
+    // }
 
     fn full_nand_adder(&self) -> Graph<Node, ()> {
         let mut dag = Graph::<Node, ()>::new();
@@ -272,9 +311,10 @@ struct Label(String);
 #[derive(Debug)]
 pub enum GateType {
     NAnd,
-    XOr,
-    Or,
-    And
+    // XOr,
+    // Or,
+    // And,
+    // Not,
 }
 
 #[derive(Debug)]
@@ -301,14 +341,20 @@ struct Gate {
 
 //Graph recursion and string generation
 
-fn ancestors(circuit: &Graph<Node, (), Directed, u32>) -> String {
+fn ancestors(circuit: &Graph<Node, (), Directed, u32>, name: &str) -> String {
     let mut output = String::new();
-    output.push_str((&format!("( ")));
-    for node in circuit.externals(Direction::Outgoing) {
-        &output.push_str("NAND ");
-        ascend(&circuit, node, &mut output, 0);
-        &output.push_str(" )");
+    output.push_str((&format!("")));
+    let mut inputs = String::new();
+    for input in circuit.externals((Direction::Incoming)) {
+        inputs.push_str(&format!("{} ",circuit.node_weight(input).unwrap()));
     }
+    &output.push_str(&format!("\n(\nsetq ({} {}) '",name,inputs));
+    for node in circuit.externals(Direction::Outgoing) {
+        &output.push_str(&format!(""));
+        ascend(&circuit, node, &mut output, 0);
+    }
+
+    &output.push_str(" \n)");
     output
 }
 
@@ -399,9 +445,10 @@ impl Display for GateType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let name = match self {
             GateType::NAnd => "NAND",
-            GateType::And => "AND",
-            GateType::XOr => "XOR",
-            GateType::Or => "OR",
+            // GateType::And => "AND",
+            // GateType::XOr => "XOR",
+            // GateType::Or => "OR",
+            // GateType::Not => "NOT",
         };
         write!(f, "{}", name)
     }
