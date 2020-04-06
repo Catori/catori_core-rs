@@ -1,4 +1,5 @@
 use lexpr::to_string;
+use lexpr::from_str;
 use lexpr::parse::NilSymbol;
 use lexpr::{
     parse::Error as ParseError,
@@ -20,24 +21,21 @@ fn main() {
     let gates = vec![
         ("NAND", u.nand()),
         ("NOT", u.not()),
-     //   ("simpl-NOT", u.simple_not()),
         ("AND", u.and()),
         ("OR", u.or()),
         ("NOR", u.nor()),
         ("XOR", u.xor()),
         ("XNOR", u.xnor()),
-     //   ("MUX", u.mux()),
+//        ("MUX", u.mux()),
         ("Adder", u.full_nand_adder()),
      //   ("SimplifiedAdder", u.full_adder()),
     ];
 
     for (key, val) in gates {
-        println!("\n{}", key);
-        println!("inputs -> {} \n", descendants(&val));
-        //println!("inputs -> {} \n", descendants(&val).replace("NAND ", ""));
-        println!("output <- {}", ancestors(&val,&key));
-        //let lexpr = lexpr::from_str(&ancestors(&val)).unwrap();
-
+        let sexpr = defun(&val, &key);
+        println!("{}", sexpr);
+        let lexpr = from_str(&sexpr).unwrap();
+        println!("{:#}", lexpr);
     }
 }
 
@@ -254,9 +252,9 @@ impl Universe {
 
     fn full_nand_adder(&self) -> Graph<Node, ()> {
         let mut dag = Graph::<Node, ()>::new();
-        let switcha = dag.add_node((Node::Input(Input("A".to_string()))));
-        let switchb = dag.add_node((Node::Input(Input("B".to_string()))));
-        let switchc = dag.add_node((Node::Input(Input("C".to_string()))));
+        let switcha = dag.add_node((Node::Input(Input("InputA".to_string()))));
+        let switchb = dag.add_node((Node::Input(Input("InputB".to_string()))));
+        let switchc = dag.add_node((Node::Input(Input("CarryIN".to_string()))));
         let d = dag.add_node(self.NAND_gate());
         let e = dag.add_node(self.NAND_gate());
         let f = dag.add_node(self.NAND_gate());
@@ -341,20 +339,20 @@ struct Gate {
 
 //Graph recursion and string generation
 
-fn ancestors(circuit: &Graph<Node, (), Directed, u32>, name: &str) -> String {
+fn defun(circuit: &Graph<Node, (), Directed, u32>, name: &str) -> String {
     let mut output = String::new();
     output.push_str((&format!("")));
     let mut inputs = String::new();
     for input in circuit.externals((Direction::Incoming)) {
         inputs.push_str(&format!("{} ",circuit.node_weight(input).unwrap()));
     }
-    &output.push_str(&format!("\n(\nsetq ({} {}) '",name,inputs));
+    &output.push_str(&format!("\n(defun ({} ({})) (",name,inputs));
     for node in circuit.externals(Direction::Outgoing) {
         &output.push_str(&format!(""));
         ascend(&circuit, node, &mut output, 0);
     }
 
-    &output.push_str(" \n)");
+    &output.push_str(") )");
     output
 }
 
@@ -362,7 +360,7 @@ fn descendants(circuit: &Graph<Node, (), Directed, u32>) -> String {
     let mut input = String::new();
 
     for node in circuit.externals(Direction::Incoming) {
-        input.push_str((&format!("\n(")));
+        input.push_str((&format!("( ")));
         input.push_str(&format!("{} ", index2symbol(&node)));
         descend(&circuit, node, &mut input, 0);
         input.push_str((&format!("")));
@@ -444,7 +442,7 @@ impl Into<Label> for &str {
 impl Display for GateType {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let name = match self {
-            GateType::NAnd => "NAND",
+            GateType::NAnd => "",
             // GateType::And => "AND",
             // GateType::XOr => "XOR",
             // GateType::Or => "OR",

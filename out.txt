@@ -1,0 +1,24 @@
+(defun (NAND (A B )) (( A )( B )) )
+(defun (NAND (A B)) ((A) (B)))
+
+(defun (NOT (A )) (( A )( A )) )
+(defun (NOT (A)) ((A) (A)))
+
+(defun (AND (A B )) ((  ( A )( B ))(  ( A )( B ))) )
+(defun (AND (A B)) (((A) (B)) ((A) (B))))
+
+(defun (OR (A B )) ((  ( A )( A ))(  ( B )( B ))) )
+(defun (OR (A B)) (((A) (A)) ((B) (B))))
+
+(defun (NOR (A B )) ((  (  ( A )( A ))(  ( B )( B )))(  (  ( A )( A ))(  ( B )( B )))) )
+(defun (NOR (A B)) ((((A) (A)) ((B) (B))) (((A) (A)) ((B) (B)))))
+
+(defun (XOR (A B )) ((  (  ( A )( B ))( A ))(  (  ( A )( B ))( B ))) )
+(defun (XOR (A B)) ((((A) (B)) (A)) (((A) (B)) (B))))
+
+(defun (XNOR (A B )) ((  (  ( B )( B ))(  ( A )( A )))(  ( A )( B ))) )
+(defun (XNOR (A B)) ((((B) (B)) ((A) (A))) ((A) (B))))
+
+(defun (Adder (InputA InputB CarryIN )) ((  (  (  (  (  (  ( InputA )( CarryIN )))(  (  ( InputA )( CarryIN ))( InputA )( CarryIN )))( InputB ))( InputB ))(  (  (  (  ( InputA )( CarryIN )))(  (  ( InputA )( CarryIN ))( InputA )( CarryIN )))( InputB ))(  (  (  ( InputA )( CarryIN )))(  (  ( InputA )( CarryIN ))( InputA )( CarryIN ))))(  (  ( InputA )( CarryIN ))(  ( InputA )( CarryIN )))(  (  (  (  (  ( InputA )( CarryIN )))(  (  ( InputA )( CarryIN ))( InputA )( CarryIN )))( InputB ))(  (  (  (  ( InputA )( CarryIN )))(  (  ( InputA )( CarryIN ))( InputA )( CarryIN )))( InputB )))) )
+(defun (Adder (InputA InputB CarryIN)) ((((((((InputA) (CarryIN))) (((InputA) (CarryIN)) (InputA) (CarryIN))) (InputB)) (InputB)) (((((InputA) (CarryIN))) (((InputA) (CarryIN)) (InputA) (CarryIN))) (InputB)) ((((InputA) (CarryIN))) (((InputA) (CarryIN)) (InputA) (CarryIN)))) (((InputA) (CarryIN)) ((InputA) (CarryIN))) ((((((InputA) (CarryIN))) (((InputA) (CarryIN)) (InputA) (CarryIN))) (InputB)) (((((InputA) (CarryIN))) (((InputA) (CarryIN)) (InputA) (CarryIN))) (InputB)))))
+
